@@ -19,6 +19,7 @@ export interface PersonalityCard { 'trait' : string }
 export interface Player {
   'id' : PlayerId,
   'name' : string,
+  'role' : string,
   'personalityCard' : [] | [PersonalityCard],
   'isAnchor' : boolean,
 }

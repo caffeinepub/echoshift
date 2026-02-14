@@ -100,6 +100,7 @@ export interface RoomState {
 export interface Player {
     id: PlayerId;
     name: string;
+    role: string;
     personalityCard?: PersonalityCard;
     isAnchor: boolean;
 }
@@ -241,17 +242,20 @@ function from_candid_record_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint
 function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     id: _PlayerId;
     name: string;
+    role: string;
     personalityCard: [] | [_PersonalityCard];
     isAnchor: boolean;
 }): {
     id: PlayerId;
     name: string;
+    role: string;
     personalityCard?: PersonalityCard;
     isAnchor: boolean;
 } {
     return {
         id: value.id,
         name: value.name,
+        role: value.role,
         personalityCard: record_opt_to_undefined(from_candid_opt_n6(_uploadFile, _downloadFile, value.personalityCard)),
         isAnchor: value.isAnchor
     };

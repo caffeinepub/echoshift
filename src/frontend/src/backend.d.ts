@@ -18,6 +18,7 @@ export interface RoomState {
 export interface Player {
     id: PlayerId;
     name: string;
+    role: string;
     personalityCard?: PersonalityCard;
     isAnchor: boolean;
 }

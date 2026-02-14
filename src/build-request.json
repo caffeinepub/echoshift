@@ -1,187 +1,67 @@
 {
   "kind": "build_request",
-  "title": "EchoShift MVP: Room-based multiplayer chat game (Anchor + Personality Cards) with lobby and game flow",
+  "title": "Add a role string field to each Player record (default empty)",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Create the base frontend app structure for EchoShift with these routes/screens and consistent navigation flow: Home (Create Room / Join Room), Lobby (room code + connected players + host controls), Game Chat (chat phase UI), Guessing (Anchor selects player), Results (show outcome and reveal roles/cards). All user-facing text must be in English.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "user-1"
-        ],
-        "quotes": [
-          "Pages required:\n\nHome (Create Room / Join Room)\n\nLobby (show players)\n\nGame Chat screen\n\nGuessing screen\n\nResults screen"
-        ]
-      },
-      "acceptanceCriteria": [
-        "User can navigate through Home → Lobby → Game Chat → Guessing → Results via app state transitions (not manual URL editing).",
-        "Each screen has a clear title/header and primary actions appropriate to the phase (e.g., Create/Join, Start Game, Send Message, Submit Guess, Return/Home).",
-        "All user-visible strings are English."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Implement anonymous player identity generation on the client with auto-generated usernames in the format AdjectiveAnimalNumber (e.g., \"BlueTiger42\"), with no login required. Persist the generated username locally so refresh does not change it unless the user explicitly resets it.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "user-1"
-        ],
-        "quotes": [
-          "Anonymous usernames auto-generated (e.g., BlueTiger42)\n\nNo login required"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Creating/joining a room auto-assigns a username if none exists.",
-        "Username matches the pattern WordWordDigits (example provided) and is shown in Lobby and Chat.",
-        "A page refresh preserves the same username for the same browser session/device."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Implement backend room management in the single Motoko actor: create room with a short room code, join room by code, track connected players, track host, and expose query/update methods for the frontend to read room state and mutate it.",
+      "id": "REQ-10",
+      "text": "Add a new field named `role` of type `Text` to the backend `Player` record stored in each room, with a default value of the empty string (`\"\"`) for newly created and newly joined players.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "user-1"
+          "recent-messages"
         ],
         "quotes": [
-          "Players join using a room code\n\nLobby screen showing connected players\n\nHost can start the game"
+          "Add a new field called \"role\" to each player inside the room database.\n\nThe role field should be a string.\n\nDefault value should be empty.\n\nDo not change anything else."
         ]
       },
       "acceptanceCriteria": [
-        "Backend supports: createRoom() -> roomCode, joinRoom(roomCode, playerName) -> playerId, getRoom(roomCode) -> room state, and leaveRoom(roomCode, playerId) or equivalent cleanup.",
-        "Room state includes: roomCode, host playerId, list of players (id + name), and current game phase/status.",
-        "Joining a non-existent room code returns a clear error the UI can display."
+        "`backend/main.mo` `type Player` includes `role : Text`.",
+        "`createRoom` initializes the host player with `role = \"\"`.",
+        "`joinRoom` initializes the joining player with `role = \"\"`.",
+        "No other backend behavior changes (room creation/join/start game/chat/state APIs behave the same aside from the additional field being present in returned `RoomState`)."
       ]
     },
     {
-      "id": "REQ-4",
-      "text": "Provide near-real-time multiplayer updates compatible with Internet Computer constraints by implementing client-side polling (via React Query refetch intervals) for room state and chat messages, instead of Firebase/Supabase realtime subscriptions.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "user-1"
-        ],
-        "quotes": [
-          "Real-time chat using Firebase or Supabase"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Lobby player list updates on other clients within a short polling interval (e.g., ~1–2s) without manual refresh.",
-        "Chat messages sent by one client appear on other clients within the polling interval.",
-        "Polling is paused or reduced when the user is not in an active room/game screen to avoid unnecessary load."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Implement game start and role assignment: when the host starts the game for a room with 3–6 players, the backend assigns exactly one player as Anchor and assigns a secret Personality Card to every other player. Ensure each player can only retrieve their own secret role/card, while the room state visible to everyone does not reveal secrets.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "user-1"
-        ],
-        "quotes": [
-          "A party chat game for 3–6 players. One player is secretly assigned as “Anchor” (normal). All other players receive a secret “Personality Card” that makes them act slightly weird during the chat."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Host can start only if player count is between 3 and 6 inclusive.",
-        "Exactly one Anchor is assigned per game; all others have a non-empty Personality Card.",
-        "There is an API for a player to fetch their own secret assignment; other players cannot fetch someone else’s secret role/card.",
-        "Public room/game state does not include secret roles/cards."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Implement the chat phase: store chat messages per room on the backend with sender name and timestamp/order, and provide APIs to post messages and list messages. The Game Chat screen must show a scrolling message list and an input to send messages.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "user-1"
-        ],
-        "quotes": [
-          "Real-time multiplayer web app called EchoShift.\n\n... run-time chat ..."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Users in the Game Chat screen can send a message and see it appear in their local timeline immediately (optimistic UI acceptable) and persist via backend.",
-        "Other players see new messages via polling updates.",
-        "Messages are attributed to the correct anonymous username and shown in chronological order."
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Implement the guessing and results flow: after the chat phase, only the Anchor can submit a single guess selecting one player as the \"weird\" player; then the Results screen reveals the Anchor, each player’s Personality Card (for non-Anchor players), the Anchor’s guess, and whether it was correct.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "user-1"
-        ],
-        "quotes": [
-          "After the chat, the Anchor must guess who was acting weird.\n\nGuessing screen\n\nResults screen"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Only the Anchor can submit the guess; non-Anchor players can view the guessing status but cannot submit.",
-        "Submitting a guess transitions the room/game into Results state for all players.",
-        "Results reveal: Anchor identity, each non-Anchor player’s Personality Card, guessed player, and correctness."
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Apply a modern, clean, minimal visual theme across all screens with mobile-responsive layout, soft rounded cards, and clean typography. Choose a coherent non-blue/purple color palette and enforce consistent spacing, button styles, and surface elevations.",
+      "id": "REQ-11",
+      "text": "Update generated frontend/backend type bindings (as needed) so the frontend compiles with the updated `Player` type that now includes the `role` field, without introducing any new UI behavior or user-facing text.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-1"
+          "recent-messages"
         ],
         "quotes": [
-          "Modern clean UI\n\nMobile responsive\n\nKeep UI minimal and smooth. Use soft rounded cards and clean typography."
+          "Do not change anything else."
         ]
       },
       "acceptanceCriteria": [
-        "All screens are usable on mobile widths (e.g., 360px) without horizontal scrolling.",
-        "Cards, inputs, and buttons have consistent rounded styling and typography.",
-        "Color palette avoids the default blue/purple theme unless explicitly requested (not requested here)."
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Add basic guardrails and UX validation: show clear errors for invalid room code, full room (more than 6 players), attempting to start with fewer than 3 players, and attempting actions not allowed for the current phase (e.g., chatting before game starts).",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "user-1"
-        ],
-        "quotes": [
-          "A party chat game for 3–6 players.\n\nPlayers join using a room code\n\nHost can start the game"
-        ]
-      },
-      "acceptanceCriteria": [
-        "UI displays actionable error messages in English for invalid room and capacity/phase errors.",
-        "Backend enforces 3–6 player constraints and phase restrictions even if UI is bypassed.",
-        "Buttons are disabled or hidden when actions are not permitted (e.g., Start Game visible to host only)."
+        "TypeScript compilation succeeds after the backend `Player` type changes.",
+        "No new screens, components, or visible UI changes are introduced; the app renders and functions as before."
       ]
     }
   ],
   "constraints": [
-    "Backend must be implemented as a single Motoko actor in backend/main.mo; do not introduce additional backend services.",
-    "Do not edit files under frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui (compose them instead).",
-    "Do not use Firebase or Supabase; implement multiplayer synchronization using Internet Computer canister calls with polling (no WebSockets).",
-    "No login required; do not require Internet Identity sign-in for core gameplay.",
-    "MVP only: do not add power cards or additional card mechanics beyond Anchor + Personality Cards."
+    "Keep the backend as a single Motoko actor in `backend/main.mo`.",
+    "Do not introduce any new gameplay logic (e.g., role assignment rules) beyond adding the `role` field with an empty-string default.",
+    "Do not modify any user-facing text."
   ],
   "nonGoals": [
-    "Integrating Firebase, Supabase, or any third-party realtime subscription service.",
-    "Adding power cards or additional roles beyond Anchor and Personality Cards.",
-    "Payments, accounts, friends lists, social features, or chat moderation tooling.",
-    "True realtime via WebSockets/push notifications."
+    "Implementing the full role system (Anchor/personality cards) or any secret-role visibility rules.",
+    "Changing room phases or navigation behavior.",
+    "Adding any new frontend display of the `role` field."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

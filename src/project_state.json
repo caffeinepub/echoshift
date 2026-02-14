@@ -1,11 +1,12 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
+  "projectStateVersion": 5,
   "summary": "Build EchoShift, a real-time multiplayer party chat web app (MVP) for 3–6 players with anonymous usernames, room codes, lobby, chat gameplay, guessing, and results—no login, minimal modern responsive UI.",
   "architectural_notes": [
     "MVP scope: no power cards yet.",
     "Realtime backend should use Firebase or Supabase for room state + chat messages.",
-    "No authentication: players use auto-generated anonymous usernames and join via room code."
+    "No authentication: players use auto-generated anonymous usernames and join via room code.",
+    "Extend the room/player data model to include a per-player 'role' field (string, default \"\") stored in the backend room state."
   ],
   "known_issues": [],
   "isFixRequest": false,
@@ -65,6 +66,14 @@
         "REQ-9"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-generated-frontend-backend-type-bindings-as-needed-so-the-frontend-compiles-with-the-updated-player-type-that-now-includes-the-role-field-without-introducing-any-new-ui-behavior-or-user-facing-text",
+      "title": "Update generated frontend/backend type bindings (as needed) so the frontend compiles with the updated `Player` type that now includes the `role` field, without introducing any new UI behavior or user-facing text.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -117,6 +126,20 @@
       "summary": "Implement game start and role assignment: when the host starts the game for a room with 3–6 players, the backend assigns exactly one player as Anchor and assigns a secret Personality Card to every other player. Ensure each player can only retrieve their own secret role/card, while the room state visible to everyone does not reveal secrets.",
       "reqIds": [
         "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Add a 'role' string field to each player record in the room database (default empty) to support later secret role assignment",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Add a new field named `role` of type `Text` to the backend `Player` record stored in each room, with a default value of the empty string (`\"\"`) for newly created and newly joined players.",
+      "reqIds": [
+        "REQ-10"
       ],
       "status": "pending"
     }

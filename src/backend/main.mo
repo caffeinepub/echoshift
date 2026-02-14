@@ -3,7 +3,9 @@ import Map "mo:core/Map";
 import Text "mo:core/Text";
 import Time "mo:core/Time";
 import Runtime "mo:core/Runtime";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   type RoomCode = Text;
   type PlayerId = Text;
@@ -17,6 +19,7 @@ actor {
     name : Text;
     isAnchor : Bool;
     personalityCard : ?PersonalityCard;
+    role : Text; // New persistent field
   };
 
   type ChatMessage = {
@@ -45,6 +48,7 @@ actor {
       name = hostName;
       isAnchor = false;
       personalityCard = null;
+      role = "";
     };
 
     let newRoom : RoomState = {
@@ -73,6 +77,7 @@ actor {
       name = playerName;
       isAnchor = false;
       personalityCard = null;
+      role = "";
     };
 
     let updatedPlayers = room.players.concat([newPlayer]);

@@ -20,6 +20,7 @@ export const PersonalityCard = IDL.Record({ 'trait' : IDL.Text });
 export const Player = IDL.Record({
   'id' : PlayerId,
   'name' : IDL.Text,
+  'role' : IDL.Text,
   'personalityCard' : IDL.Opt(PersonalityCard),
   'isAnchor' : IDL.Bool,
 });
@@ -59,6 +60,7 @@ export const idlFactory = ({ IDL }) => {
   const Player = IDL.Record({
     'id' : PlayerId,
     'name' : IDL.Text,
+    'role' : IDL.Text,
     'personalityCard' : IDL.Opt(PersonalityCard),
     'isAnchor' : IDL.Bool,
   });
