@@ -1,0 +1,125 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-14T07:36:56.801Z",
+  "summary": "The diff adds an MVP frontend with Home/Lobby/Chat/Guessing/Results screens and a Motoko backend actor supporting room creation/joining, starting a game, fetching room state, and sending chat messages with client polling. However, several core requirements are incomplete or violated: backend API shapes don’t match the requested signatures, no leave/cleanup exists, secret role/card information is exposed in public room state, username persistence is not implemented, polling is not paused when inactive, and guessing/results backend flow is not implemented.",
+  "missing_requirements": [
+    {
+      "id": "REQ-2",
+      "requirement": "Persist the generated anonymous username locally so refresh does not change it unless the user explicitly resets it.",
+      "reason": "Username generation exists, but there is no evidence of localStorage (or equivalent) persistence for the username; only playerId is persisted. useLocalUsername sets username in session state only.",
+      "evidence": [
+        "frontend/src/echoshift/identity/useLocalUsername.ts",
+        "frontend/src/echoshift/identity/playerId.ts"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Backend room management APIs must match: createRoom() -> roomCode, joinRoom(roomCode, playerName) -> playerId, getRoom(roomCode) -> room state, and leaveRoom(roomCode, playerId) or equivalent cleanup.",
+      "reason": "Backend signatures differ and required operations are missing: createRoom requires (hostId, hostName, roomCode) and returns async (), joinRoom requires playerId and returns async (), there is no leaveRoom/cleanup method, and getRoom is implemented as getRoomState with a different name/shape.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/echoshift/api/useCreateRoom.ts",
+        "frontend/src/echoshift/api/useJoinRoom.ts",
+        "frontend/src/echoshift/api/useRoomState.ts"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Polling is paused or reduced when the user is not in an active room/game screen to avoid unnecessary load.",
+      "reason": "Room polling is always enabled when actor and roomCode exist; there is no evidence of pausing/reducing based on screen/activity.",
+      "evidence": [
+        "frontend/src/echoshift/api/useRoomState.ts"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "Ensure each player can only retrieve their own secret role/card, while the public room state visible to everyone does not reveal secrets.",
+      "reason": "Public RoomState includes per-player isAnchor and personalityCard fields and getRoomState returns the full RoomState, exposing secret roles/cards to all clients. There is also no separate API shown for fetching only the caller’s secret assignment.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/echoshift/screens/GameChatScreen.tsx",
+        "frontend/src/echoshift/screens/ResultsScreen.tsx"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "Assign exactly one Anchor and a non-empty Personality Card to every other player when the host starts the game for 3–6 players.",
+      "reason": "Role assignment sets the host as Anchor rather than selecting exactly one player arbitrarily, and uses a hardcoded personality card trait ('RandomTrait') rather than a real card set; also no enforcement of the <=6 constraint at startGame time is shown (only <3 is checked).",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "requirement": "Provide APIs to post messages and list messages; messages should be retrieved via polling updates.",
+      "reason": "sendMessage exists, but there is no dedicated listMessages API; messages are only accessible by fetching full room state. The requirement explicitly calls for APIs to post and list messages.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "requirement": "Implement guessing and results flow: only Anchor can submit a guess; submitting transitions to Results; Results reveal Anchor, personality cards, guess, and correctness.",
+      "reason": "Frontend explicitly states guessing/scoring are not implemented and backend has no APIs for submitting a guess, storing guessed player, transitioning to results, or computing correctness.",
+      "evidence": [
+        "frontend/src/echoshift/screens/GuessingScreen.tsx",
+        "frontend/src/echoshift/screens/ResultsScreen.tsx",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "requirement": "Backend enforces phase restrictions and UI disables/hides actions not permitted for the current phase (e.g., chatting before game starts).",
+      "reason": "Backend sendMessage does not check the room phase; startGame sets phase to #chatting but no other phase transitions or enforcement are shown. Frontend ChatComposer is always available on the chat screen without evidence of phase-based disabling, and there is no backend enforcement for phase-based actions beyond startGame’s host and min-player checks.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/echoshift/screens/GameChatScreen.tsx",
+        "frontend/src/echoshift/components/ChatComposer.tsx"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Footer attribution link to caffeine.ai with 'Built with ❤️' text.",
+      "reason": "Not requested in the BuildRequest; adds extra branding/content beyond specified screens/flow.",
+      "evidence": [
+        "frontend/src/echoshift/components/ScreenLayout.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.78,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/echoshift/api/useCreateRoom.ts",
+    "frontend/src/echoshift/api/useJoinRoom.ts",
+    "frontend/src/echoshift/api/useRoomState.ts",
+    "frontend/src/echoshift/api/useSendMessage.ts",
+    "frontend/src/echoshift/api/useStartGame.ts",
+    "frontend/src/echoshift/components/AppHeader.tsx",
+    "frontend/src/echoshift/components/ChatComposer.tsx",
+    "frontend/src/echoshift/components/ChatMessageList.tsx",
+    "frontend/src/echoshift/components/ErrorBanner.tsx",
+    "frontend/src/echoshift/components/ScreenLayout.tsx",
+    "frontend/src/echoshift/identity/playerId.ts",
+    "frontend/src/echoshift/identity/useLocalUsername.ts",
+    "frontend/src/echoshift/identity/username.ts",
+    "frontend/src/echoshift/screens/GameChatScreen.tsx",
+    "frontend/src/echoshift/screens/GuessingScreen.tsx",
+    "frontend/src/echoshift/screens/HomeScreen.tsx",
+    "frontend/src/echoshift/screens/LobbyScreen.tsx",
+    "frontend/src/echoshift/screens/ResultsScreen.tsx",
+    "frontend/src/echoshift/state/session.ts",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

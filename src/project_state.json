@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Build EchoShift, a real-time multiplayer party chat web app (MVP) for 3–6 players with anonymous usernames, room codes, lobby, chat gameplay, guessing, and results—no login, minimal modern responsive UI.",
+  "architectural_notes": [
+    "MVP scope: no power cards yet.",
+    "Realtime backend should use Firebase or Supabase for room state + chat messages.",
+    "No authentication: players use auto-generated anonymous usernames and join via room code."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-create-the-base-frontend-app-structure-for-echoshift-with-these-routes-screens-and-consistent-navigation-flow-home-create-room-join-room-lobby-room-code-connected-players-host-controls-game-chat-chat-phase-ui-guessing-anchor-selects-player-results-show-outcome-and-reveal-roles-cards-all-user-facing-text-must-be-in-english",
+      "title": "Create the base frontend app structure for EchoShift with these routes/screens and consistent navigation flow: Home (Create Room / Join Room), Lobby (room code + connected players + host controls), Game Chat (chat phase UI), Guessing (Anchor selects player), Results (show outcome and reveal roles/cards). All user-facing text must be in English.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-anonymous-player-identity-generation-on-the-client-with-auto-generated-usernames-in-the-format-adjectiveanimalnumber-e-g-bluetiger42-with-no-login-required-persist-the-generated-username-locally-so-refresh-does-not-change-it-unless-the-user-explicitly-resets-it",
+      "title": "Implement anonymous player identity generation on the client with auto-generated usernames in the format AdjectiveAnimalNumber (e.g., \"BlueTiger42\"), with no login required. Persist the generated username locally so refresh does not change it unless the user explicitly resets it.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-near-real-time-multiplayer-updates-compatible-with-internet-computer-constraints-by-implementing-client-side-polling-via-react-query-refetch-intervals-for-room-state-and-chat-messages-instead-of-firebase-supabase-realtime-subscriptions",
+      "title": "Provide near-real-time multiplayer updates compatible with Internet Computer constraints by implementing client-side polling (via React Query refetch intervals) for room state and chat messages, instead of Firebase/Supabase realtime subscriptions.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-chat-phase-store-chat-messages-per-room-on-the-backend-with-sender-name-and-timestamp-order-and-provide-apis-to-post-messages-and-list-messages-the-game-chat-screen-must-show-a-scrolling-message-list-and-an-input-to-send-messages",
+      "title": "Implement the chat phase: store chat messages per room on the backend with sender name and timestamp/order, and provide APIs to post messages and list messages. The Game Chat screen must show a scrolling message list and an input to send messages.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-guessing-and-results-flow-after-the-chat-phase-only-the-anchor-can-submit-a-single-guess-selecting-one-player-as-the-weird-player-then-the-results-screen-reveals-the-anchor-each-player-s-personality-card-for-non-anchor-players-the-anchor-s-guess-and-whether-it-was-correct",
+      "title": "Implement the guessing and results flow: after the chat phase, only the Anchor can submit a single guess selecting one player as the \"weird\" player; then the Results screen reveals the Anchor, each player’s Personality Card (for non-Anchor players), the Anchor’s guess, and whether it was correct.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-modern-clean-minimal-visual-theme-across-all-screens-with-mobile-responsive-layout-soft-rounded-cards-and-clean-typography-choose-a-coherent-non-blue-purple-color-palette-and-enforce-consistent-spacing-button-styles-and-surface-elevations",
+      "title": "Apply a modern, clean, minimal visual theme across all screens with mobile-responsive layout, soft rounded cards, and clean typography. Choose a coherent non-blue/purple color palette and enforce consistent spacing, button styles, and surface elevations.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-basic-guardrails-and-ux-validation-show-clear-errors-for-invalid-room-code-full-room-more-than-6-players-attempting-to-start-with-fewer-than-3-players-and-attempting-actions-not-allowed-for-the-current-phase-e-g-chatting-before-game-starts",
+      "title": "Add basic guardrails and UX validation: show clear errors for invalid room code, full room (more than 6 players), attempting to start with fewer than 3 players, and attempting actions not allowed for the current phase (e.g., chatting before game starts).",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Set up base app structure and navigation for EchoShift (Home, Lobby, Game Chat, Guessing, Results) with minimal modern responsive UI",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Implement realtime multiplayer rooms with join/create via room code (Firebase or Supabase)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Auto-generate anonymous usernames for players (e.g., BlueTiger42) with no login required",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Lobby: show connected players and host controls to start the game",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Game logic: assign 1 Anchor and Personality Cards to other players; run real-time chat phase",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Guessing and results flow: Anchor guesses who had Personality Cards; show results screen",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Implement backend room management in the single Motoko actor: create room with a short room code, join room by code, track connected players, track host, and expose query/update methods for the frontend to read room state and mutate it.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Implement game start and role assignment: when the host starts the game for a room with 3–6 players, the backend assigns exactly one player as Anchor and assigns a secret Personality Card to every other player. Ensure each player can only retrieve their own secret role/card, while the room state visible to everyone does not reveal secrets.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "EchoShift",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

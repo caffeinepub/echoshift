@@ -1,0 +1,163 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-create-the-base-frontend-app-structure-for-echoshift-with-these-routes-screens-and-consistent-navigation-flow-home-create-room-join-room-lobby-room-code-connected-players-host-controls-game-chat-chat-phase-ui-guessing-anchor-selects-player-results-show-outcome-and-reveal-roles-cards-all-user-facing-text-must-be-in-english",
+      "featureTitle": "Create the base frontend app structure for EchoShift with these routes/screens and consistent navigation flow: Home (Create Room / Join Room), Lobby (room code + connected players + host controls), Game Chat (chat phase UI), Guessing (Anchor selects player), Results (show outcome and reveal roles/cards). All user-facing text must be in English.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/echoshift/components/AppHeader.tsx",
+        "frontend/src/echoshift/screens/GameChatScreen.tsx",
+        "frontend/src/echoshift/screens/GuessingScreen.tsx",
+        "frontend/src/echoshift/screens/HomeScreen.tsx",
+        "frontend/src/echoshift/screens/LobbyScreen.tsx",
+        "frontend/src/echoshift/screens/ResultsScreen.tsx",
+        "frontend/src/echoshift/state/session.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-anonymous-player-identity-generation-on-the-client-with-auto-generated-usernames-in-the-format-adjectiveanimalnumber-e-g-bluetiger42-with-no-login-required-persist-the-generated-username-locally-so-refresh-does-not-change-it-unless-the-user-explicitly-resets-it",
+      "featureTitle": "Implement anonymous player identity generation on the client with auto-generated usernames in the format AdjectiveAnimalNumber (e.g., \"BlueTiger42\"), with no login required. Persist the generated username locally so refresh does not change it unless the user explicitly resets it.",
+      "files": [
+        "frontend/src/echoshift/identity/playerId.ts",
+        "frontend/src/echoshift/identity/useLocalUsername.ts",
+        "frontend/src/echoshift/identity/username.ts",
+        "frontend/src/echoshift/screens/GameChatScreen.tsx",
+        "frontend/src/echoshift/screens/HomeScreen.tsx",
+        "frontend/src/echoshift/screens/LobbyScreen.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-provide-near-real-time-multiplayer-updates-compatible-with-internet-computer-constraints-by-implementing-client-side-polling-via-react-query-refetch-intervals-for-room-state-and-chat-messages-instead-of-firebase-supabase-realtime-subscriptions",
+      "featureTitle": "Provide near-real-time multiplayer updates compatible with Internet Computer constraints by implementing client-side polling (via React Query refetch intervals) for room state and chat messages, instead of Firebase/Supabase realtime subscriptions.",
+      "files": [
+        "frontend/src/echoshift/api/useRoomState.ts",
+        "frontend/src/echoshift/screens/GameChatScreen.tsx",
+        "frontend/src/echoshift/screens/LobbyScreen.tsx",
+        "frontend/src/echoshift/state/session.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-the-chat-phase-store-chat-messages-per-room-on-the-backend-with-sender-name-and-timestamp-order-and-provide-apis-to-post-messages-and-list-messages-the-game-chat-screen-must-show-a-scrolling-message-list-and-an-input-to-send-messages",
+      "featureTitle": "Implement the chat phase: store chat messages per room on the backend with sender name and timestamp/order, and provide APIs to post messages and list messages. The Game Chat screen must show a scrolling message list and an input to send messages.",
+      "files": [
+        "frontend/src/echoshift/api/useSendMessage.ts",
+        "frontend/src/echoshift/components/ChatComposer.tsx",
+        "frontend/src/echoshift/components/ChatMessageList.tsx",
+        "frontend/src/echoshift/screens/GameChatScreen.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-the-guessing-and-results-flow-after-the-chat-phase-only-the-anchor-can-submit-a-single-guess-selecting-one-player-as-the-weird-player-then-the-results-screen-reveals-the-anchor-each-player-s-personality-card-for-non-anchor-players-the-anchor-s-guess-and-whether-it-was-correct",
+      "featureTitle": "Implement the guessing and results flow: after the chat phase, only the Anchor can submit a single guess selecting one player as the \"weird\" player; then the Results screen reveals the Anchor, each player’s Personality Card (for non-Anchor players), the Anchor’s guess, and whether it was correct.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/echoshift/api/useStartGame.ts",
+        "frontend/src/echoshift/screens/GuessingScreen.tsx",
+        "frontend/src/echoshift/screens/ResultsScreen.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-apply-a-modern-clean-minimal-visual-theme-across-all-screens-with-mobile-responsive-layout-soft-rounded-cards-and-clean-typography-choose-a-coherent-non-blue-purple-color-palette-and-enforce-consistent-spacing-button-styles-and-surface-elevations",
+      "featureTitle": "Apply a modern, clean, minimal visual theme across all screens with mobile-responsive layout, soft rounded cards, and clean typography. Choose a coherent non-blue/purple color palette and enforce consistent spacing, button styles, and surface elevations.",
+      "files": [
+        "frontend/src/echoshift/components/ScreenLayout.tsx",
+        "frontend/src/echoshift/screens/GameChatScreen.tsx",
+        "frontend/src/echoshift/screens/GuessingScreen.tsx",
+        "frontend/src/echoshift/screens/HomeScreen.tsx",
+        "frontend/src/echoshift/screens/LobbyScreen.tsx",
+        "frontend/src/echoshift/screens/ResultsScreen.tsx",
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-basic-guardrails-and-ux-validation-show-clear-errors-for-invalid-room-code-full-room-more-than-6-players-attempting-to-start-with-fewer-than-3-players-and-attempting-actions-not-allowed-for-the-current-phase-e-g-chatting-before-game-starts",
+      "featureTitle": "Add basic guardrails and UX validation: show clear errors for invalid room code, full room (more than 6 players), attempting to start with fewer than 3 players, and attempting actions not allowed for the current phase (e.g., chatting before game starts).",
+      "files": [
+        "frontend/src/echoshift/components/ErrorBanner.tsx",
+        "frontend/src/echoshift/screens/GameChatScreen.tsx",
+        "frontend/src/echoshift/screens/GuessingScreen.tsx",
+        "frontend/src/echoshift/screens/HomeScreen.tsx",
+        "frontend/src/echoshift/screens/LobbyScreen.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    }
+  ]
+}
