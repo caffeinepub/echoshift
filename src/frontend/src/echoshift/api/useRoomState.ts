@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useActor } from '@/hooks/useActor';
-import type { RoomState } from '@/backend';
+import type { RoomStateView } from '@/backend';
 
 export function useRoomState(roomCode: string | null) {
   const { actor, isFetching: actorFetching } = useActor();
 
-  return useQuery<RoomState | null>({
+  return useQuery<RoomStateView | null>({
     queryKey: ['roomState', roomCode],
     queryFn: async () => {
       if (!actor || !roomCode) return null;

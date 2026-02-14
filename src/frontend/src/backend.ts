@@ -90,24 +90,24 @@ export class ExternalBlob {
     }
 }
 export type PlayerId = string;
-export interface RoomState {
+export type Time = bigint;
+export interface RoomStateView {
     chatMessages: Array<ChatMessage>;
-    players: Array<Player>;
+    players: Array<PlayerView>;
     phase: Variant_results_waiting_chatting_guessing;
     hostId: PlayerId;
     roomCode: RoomCode;
 }
-export interface Player {
+export type RoomCode = string;
+export interface PersonalityCard {
+    trait: string;
+}
+export interface PlayerView {
     id: PlayerId;
     name: string;
     role: string;
     personalityCard?: PersonalityCard;
     isAnchor: boolean;
-}
-export type Time = bigint;
-export type RoomCode = string;
-export interface PersonalityCard {
-    trait: string;
 }
 export interface ChatMessage {
     sender: string;
@@ -121,15 +121,30 @@ export enum Variant_results_waiting_chatting_guessing {
     guessing = "guessing"
 }
 export interface backendInterface {
+    assignRoleToPlayer(roomCode: RoomCode, playerId: PlayerId, role: string): Promise<void>;
     createRoom(hostId: PlayerId, hostName: string, roomCode: RoomCode): Promise<void>;
-    getRoomState(roomCode: RoomCode): Promise<RoomState>;
+    getRoomState(roomCode: RoomCode): Promise<RoomStateView>;
     joinRoom(roomCode: RoomCode, playerId: PlayerId, playerName: string): Promise<void>;
     sendMessage(roomCode: RoomCode, sender: string, message: string): Promise<void>;
     startGame(roomCode: RoomCode, hostId: PlayerId): Promise<void>;
 }
-import type { ChatMessage as _ChatMessage, PersonalityCard as _PersonalityCard, Player as _Player, PlayerId as _PlayerId, RoomCode as _RoomCode, RoomState as _RoomState } from "./declarations/backend.did.d.ts";
+import type { ChatMessage as _ChatMessage, PersonalityCard as _PersonalityCard, PlayerId as _PlayerId, PlayerView as _PlayerView, RoomCode as _RoomCode, RoomStateView as _RoomStateView } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
+    async assignRoleToPlayer(arg0: RoomCode, arg1: PlayerId, arg2: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.assignRoleToPlayer(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.assignRoleToPlayer(arg0, arg1, arg2);
+            return result;
+        }
+    }
     async createRoom(arg0: PlayerId, arg1: string, arg2: RoomCode): Promise<void> {
         if (this.processError) {
             try {
@@ -144,18 +159,18 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getRoomState(arg0: RoomCode): Promise<RoomState> {
+    async getRoomState(arg0: RoomCode): Promise<RoomStateView> {
         if (this.processError) {
             try {
                 const result = await this.actor.getRoomState(arg0);
-                return from_candid_RoomState_n1(this._uploadFile, this._downloadFile, result);
+                return from_candid_RoomStateView_n1(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getRoomState(arg0);
-            return from_candid_RoomState_n1(this._uploadFile, this._downloadFile, result);
+            return from_candid_RoomStateView_n1(this._uploadFile, this._downloadFile, result);
         }
     }
     async joinRoom(arg0: RoomCode, arg1: PlayerId, arg2: string): Promise<void> {
@@ -201,10 +216,10 @@ export class Backend implements backendInterface {
         }
     }
 }
-function from_candid_Player_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Player): Player {
+function from_candid_PlayerView_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _PlayerView): PlayerView {
     return from_candid_record_n5(_uploadFile, _downloadFile, value);
 }
-function from_candid_RoomState_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _RoomState): RoomState {
+function from_candid_RoomStateView_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _RoomStateView): RoomStateView {
     return from_candid_record_n2(_uploadFile, _downloadFile, value);
 }
 function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_PersonalityCard]): PersonalityCard | null {
@@ -212,7 +227,7 @@ function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Ar
 }
 function from_candid_record_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     chatMessages: Array<_ChatMessage>;
-    players: Array<_Player>;
+    players: Array<_PlayerView>;
     phase: {
         results: null;
     } | {
@@ -226,7 +241,7 @@ function from_candid_record_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint
     roomCode: _RoomCode;
 }): {
     chatMessages: Array<ChatMessage>;
-    players: Array<Player>;
+    players: Array<PlayerView>;
     phase: Variant_results_waiting_chatting_guessing;
     hostId: PlayerId;
     roomCode: RoomCode;
@@ -271,8 +286,8 @@ function from_candid_variant_n7(_uploadFile: (file: ExternalBlob) => Promise<Uin
 }): Variant_results_waiting_chatting_guessing {
     return "results" in value ? Variant_results_waiting_chatting_guessing.results : "waiting" in value ? Variant_results_waiting_chatting_guessing.waiting : "chatting" in value ? Variant_results_waiting_chatting_guessing.chatting : "guessing" in value ? Variant_results_waiting_chatting_guessing.guessing : value;
 }
-function from_candid_vec_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Player>): Array<Player> {
-    return value.map((x)=>from_candid_Player_n4(_uploadFile, _downloadFile, x));
+function from_candid_vec_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_PlayerView>): Array<PlayerView> {
+    return value.map((x)=>from_candid_PlayerView_n4(_uploadFile, _downloadFile, x));
 }
 export interface CreateActorOptions {
     agent?: Agent;

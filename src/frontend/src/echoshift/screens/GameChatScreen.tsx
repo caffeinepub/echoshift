@@ -15,8 +15,8 @@ export default function GameChatScreen() {
   const sendMessage = useSendMessage();
 
   const currentPlayer = roomState?.players.find(p => p.name === username);
-  const isAnchor = currentPlayer?.isAnchor || false;
-  const personalityCard = currentPlayer?.personalityCard;
+  const isAnchor = currentPlayer?.role === 'Anchor';
+  const playerRole = currentPlayer?.role;
 
   const handleSendMessage = (message: string) => {
     sendMessage.mutate(message);
@@ -36,9 +36,9 @@ export default function GameChatScreen() {
               </span>
             ) : (
               <span>
-                Your personality: <span className="font-semibold">{personalityCard?.trait || 'Unknown'}</span>
+                Your role: <span className="font-semibold">{playerRole || 'Unknown'}</span>
                 <br />
-                Act slightly weird according to your card. The Anchor will try to guess who you are!
+                Act according to your role. The Anchor will try to guess who you are!
               </span>
             )}
           </AlertDescription>

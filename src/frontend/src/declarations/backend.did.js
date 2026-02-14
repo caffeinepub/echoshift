@@ -8,8 +8,8 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const PlayerId = IDL.Text;
 export const RoomCode = IDL.Text;
+export const PlayerId = IDL.Text;
 export const Time = IDL.Int;
 export const ChatMessage = IDL.Record({
   'sender' : IDL.Text,
@@ -17,16 +17,16 @@ export const ChatMessage = IDL.Record({
   'timestamp' : Time,
 });
 export const PersonalityCard = IDL.Record({ 'trait' : IDL.Text });
-export const Player = IDL.Record({
+export const PlayerView = IDL.Record({
   'id' : PlayerId,
   'name' : IDL.Text,
   'role' : IDL.Text,
   'personalityCard' : IDL.Opt(PersonalityCard),
   'isAnchor' : IDL.Bool,
 });
-export const RoomState = IDL.Record({
+export const RoomStateView = IDL.Record({
   'chatMessages' : IDL.Vec(ChatMessage),
-  'players' : IDL.Vec(Player),
+  'players' : IDL.Vec(PlayerView),
   'phase' : IDL.Variant({
     'results' : IDL.Null,
     'waiting' : IDL.Null,
@@ -38,8 +38,9 @@ export const RoomState = IDL.Record({
 });
 
 export const idlService = IDL.Service({
+  'assignRoleToPlayer' : IDL.Func([RoomCode, PlayerId, IDL.Text], [], []),
   'createRoom' : IDL.Func([PlayerId, IDL.Text, RoomCode], [], []),
-  'getRoomState' : IDL.Func([RoomCode], [RoomState], ['query']),
+  'getRoomState' : IDL.Func([RoomCode], [RoomStateView], ['query']),
   'joinRoom' : IDL.Func([RoomCode, PlayerId, IDL.Text], [], []),
   'sendMessage' : IDL.Func([RoomCode, IDL.Text, IDL.Text], [], []),
   'startGame' : IDL.Func([RoomCode, PlayerId], [], []),
@@ -48,8 +49,8 @@ export const idlService = IDL.Service({
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
-  const PlayerId = IDL.Text;
   const RoomCode = IDL.Text;
+  const PlayerId = IDL.Text;
   const Time = IDL.Int;
   const ChatMessage = IDL.Record({
     'sender' : IDL.Text,
@@ -57,16 +58,16 @@ export const idlFactory = ({ IDL }) => {
     'timestamp' : Time,
   });
   const PersonalityCard = IDL.Record({ 'trait' : IDL.Text });
-  const Player = IDL.Record({
+  const PlayerView = IDL.Record({
     'id' : PlayerId,
     'name' : IDL.Text,
     'role' : IDL.Text,
     'personalityCard' : IDL.Opt(PersonalityCard),
     'isAnchor' : IDL.Bool,
   });
-  const RoomState = IDL.Record({
+  const RoomStateView = IDL.Record({
     'chatMessages' : IDL.Vec(ChatMessage),
-    'players' : IDL.Vec(Player),
+    'players' : IDL.Vec(PlayerView),
     'phase' : IDL.Variant({
       'results' : IDL.Null,
       'waiting' : IDL.Null,
@@ -78,8 +79,9 @@ export const idlFactory = ({ IDL }) => {
   });
   
   return IDL.Service({
+    'assignRoleToPlayer' : IDL.Func([RoomCode, PlayerId, IDL.Text], [], []),
     'createRoom' : IDL.Func([PlayerId, IDL.Text, RoomCode], [], []),
-    'getRoomState' : IDL.Func([RoomCode], [RoomState], ['query']),
+    'getRoomState' : IDL.Func([RoomCode], [RoomStateView], ['query']),
     'joinRoom' : IDL.Func([RoomCode, PlayerId, IDL.Text], [], []),
     'sendMessage' : IDL.Func([RoomCode, IDL.Text, IDL.Text], [], []),
     'startGame' : IDL.Func([RoomCode, PlayerId], [], []),

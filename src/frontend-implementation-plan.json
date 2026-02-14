@@ -1,27 +1,6 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Sync frontend type bindings for Player.role field",
-  "requirements": [
-    {
-      "id": "REQ-11",
-      "summary": "Update generated TypeScript bindings/usages so the frontend compiles after `Player` gains a required `role: string` field, without any UI or behavior changes.",
-      "acceptanceCriteria": [
-        "TypeScript compilation succeeds after the backend `Player` type changes.",
-        "No new screens, components, or visible UI changes are introduced; the app renders and functions as before."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/backend.d.ts",
-          "operation": "modify",
-          "description": "Regenerate or manually sync the frontend type bindings so `Player` includes a required `role: string` field (not optional), matching the updated backend candid/types. Ensure exports used by the app (e.g., `Player`, `RoomState`, `backendInterface`) remain compatible and no UI text/behavior changes are introduced."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "If TypeScript errors surface due to the updated `Player` type flowing through `RoomState`, apply minimal type-only adjustments (e.g., import/type fixes) to keep compilation passing without changing rendering, screen routing, or any user-facing text."
-        }
-      ]
-    }
-  ]
+  "title": "Assign random non-Anchor roles on game start (frontend-only plan)",
+  "requirements": []
 }

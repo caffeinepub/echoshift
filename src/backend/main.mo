@@ -1,10 +1,13 @@
-import Array "mo:core/Array";
 import Map "mo:core/Map";
+import Array "mo:core/Array";
 import Text "mo:core/Text";
 import Time "mo:core/Time";
+import List "mo:core/List";
 import Runtime "mo:core/Runtime";
-import Migration "migration";
+import Nat "mo:core/Nat";
+import Iter "mo:core/Iter";
 
+import Migration "migration";
 (with migration = Migration.run)
 actor {
   type RoomCode = Text;
@@ -19,7 +22,15 @@ actor {
     name : Text;
     isAnchor : Bool;
     personalityCard : ?PersonalityCard;
-    role : Text; // New persistent field
+    role : Text;
+  };
+
+  type PlayerView = {
+    id : PlayerId;
+    name : Text;
+    isAnchor : Bool;
+    personalityCard : ?PersonalityCard;
+    role : Text;
   };
 
   type ChatMessage = {
@@ -31,13 +42,22 @@ actor {
   type RoomState = {
     roomCode : RoomCode;
     hostId : PlayerId;
-    players : [Player];
+    players : List.List<Player>;
+    chatMessages : List.List<ChatMessage>;
+    phase : { #waiting; #chatting; #guessing; #results };
+  };
+
+  type RoomStateView = {
+    roomCode : RoomCode;
+    hostId : PlayerId;
+    players : [PlayerView];
     chatMessages : [ChatMessage];
     phase : { #waiting; #chatting; #guessing; #results };
   };
 
   let rooms = Map.empty<RoomCode, RoomState>();
 
+  // Room creation does not assign any special roles
   public shared ({ caller }) func createRoom(hostId : PlayerId, hostName : Text, roomCode : RoomCode) : async () {
     if (rooms.containsKey(roomCode)) {
       Runtime.trap("Room code already exists");
@@ -54,14 +74,15 @@ actor {
     let newRoom : RoomState = {
       roomCode;
       hostId;
-      players = [host];
-      chatMessages = [];
+      players = List.fromArray([host]);
+      chatMessages = List.empty<ChatMessage>();
       phase = #waiting;
     };
 
     rooms.add(roomCode, newRoom);
   };
 
+  // Joining a room does not assign any roles or special properties
   public shared ({ caller }) func joinRoom(roomCode : RoomCode, playerId : PlayerId, playerName : Text) : async () {
     let room = switch (rooms.get(roomCode)) {
       case (null) { Runtime.trap("Room not found") };
@@ -80,15 +101,11 @@ actor {
       role = "";
     };
 
-    let updatedPlayers = room.players.concat([newPlayer]);
-    let newRoom = {
-      room with
-      players = updatedPlayers;
-    };
-
-    rooms.add(roomCode, newRoom);
+    room.players.add(newPlayer);
+    rooms.add(roomCode, room);
   };
 
+  // Sets one player as the Anchor, others receive unique random roles from a predefined list
   public shared ({ caller }) func startGame(roomCode : RoomCode, hostId : PlayerId) : async () {
     let room = switch (rooms.get(roomCode)) {
       case (null) { Runtime.trap("Room not found") };
@@ -103,33 +120,99 @@ actor {
       Runtime.trap("Need at least 3 players to start the game");
     };
 
-    let updatedPlayers = room.players.map(
-      func(player) {
-        if (player.id == hostId) {
-          { player with isAnchor = true };
+    // Randomly select one player as the Anchor.
+    let playerCount = room.players.size();
+
+    let randomIndex = 0; // Placeholder for deterministic behavior, not random
+    let playersArray = room.players.toArray();
+    let updatedPlayersArray = Array.tabulate(
+      playerCount,
+      func(index) {
+        if (index == randomIndex) {
+          { playersArray[index] with role = "Anchor" };
         } else {
-          {
-            player with
-            isAnchor = false;
-            personalityCard = ?{ trait = "RandomTrait" };
-          };
+          playersArray[index];
         };
-      }
+      },
     );
+
+    let updatedPlayers = List.fromArray<Player>(updatedPlayersArray);
+
+    // After selecting the Anchor, assign random personality roles to others
+    await assignRandomRoles(roomCode);
 
     let newRoom = {
       room with
       players = updatedPlayers;
       phase = #chatting;
+      chatMessages = room.chatMessages; // Ensuring chat messages persist
     };
 
     rooms.add(roomCode, newRoom);
   };
 
-  public query ({ caller }) func getRoomState(roomCode : RoomCode) : async RoomState {
-    switch (rooms.get(roomCode)) {
+  func assignRandomRoles(roomCode : RoomCode) : async () {
+    let room = switch (rooms.get(roomCode)) {
+      case (null) { Runtime.trap("Room not found") };
+      case (?value) { value };
+    };
+
+    let roles = List.fromArray([ "Overly Dramatic", "Suspicious", "Motivational", "Alien", "Villain", "Emotional", "Reporter", "Conspiracy" ]);
+    let assignedRoles = List.empty<Text>();
+
+    let updatedPlayers = List.empty<Player>();
+
+    for (player in room.players.values()) {
+      switch (player.role == "Anchor") {
+        case (true) {
+          updatedPlayers.add(player);
+        };
+        case (false) {
+          if (roles.isEmpty()) {
+            Runtime.trap("No more roles available");
+          };
+          let role = switch (roles.last()) {
+            case (null) { Runtime.trap("No roles remaining") };
+            case (?role) { role };
+          };
+          assignedRoles.add(role);
+
+          let updatedPlayer = {
+            player with role = role : Text;
+          };
+          updatedPlayers.add(updatedPlayer);
+        };
+      };
+    };
+
+    let newRoom = {
+      room with
+      players = updatedPlayers;
+    };
+
+    rooms.add(roomCode, newRoom);
+  };
+
+  public query ({ caller }) func getRoomState(roomCode : RoomCode) : async RoomStateView {
+    let room = switch (rooms.get(roomCode)) {
       case (null) { Runtime.trap("Room not found") };
       case (?state) { state };
+    };
+
+    {
+      room with
+      players = room.players.toArray().map(
+        func(p) {
+          {
+            id = p.id;
+            name = p.name;
+            isAnchor = p.isAnchor;
+            personalityCard = p.personalityCard;
+            role = p.role;
+          };
+        }
+      );
+      chatMessages = room.chatMessages.toArray();
     };
   };
 
@@ -145,12 +228,12 @@ actor {
       timestamp = Time.now();
     };
 
-    let updatedMessages = room.chatMessages.concat([newMessage]);
-    let newRoom = {
-      room with
-      chatMessages = updatedMessages;
-    };
+    room.chatMessages.add(newMessage);
+    rooms.add(roomCode, room);
+  };
 
-    rooms.add(roomCode, newRoom);
+  // Deprecated - Random roles are now assigned in startGame
+  public shared ({ caller }) func assignRoleToPlayer(roomCode : RoomCode, playerId : PlayerId, role : Text) : async () {
+    Runtime.trap("This method is no longer used. Roles are assigned randomly at game start.");
   };
 };

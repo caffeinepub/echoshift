@@ -1,54 +1,41 @@
 {
   "kind": "build_request",
-  "title": "Add a role string field to each Player record (default empty)",
+  "title": "Assign random non-Anchor roles on game start",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-10",
-      "text": "Add a new field named `role` of type `Text` to the backend `Player` record stored in each room, with a default value of the empty string (`\"\"`) for newly created and newly joined players.",
+      "id": "REQ-13",
+      "text": "Update the backend `startGame(roomCode, hostId)` logic so that after one player is assigned `role = \"Anchor\"`, every other player in the room is assigned exactly one random role from this list and persisted in the room state: `Overly Dramatic`, `Suspicious`, `Motivational`, `Alien`, `Villain`, `Emotional`, `Reporter`, `Conspiracy`.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-1"
         ],
         "quotes": [
-          "Add a new field called \"role\" to each player inside the room database.\n\nThe role field should be a string.\n\nDefault value should be empty.\n\nDo not change anything else."
+          "After assigning one player as \"Anchor\":\n\nFor all other players in the room:\n\nAssign one random role from this list:\n\n- Overly Dramatic\n- Suspicious\n- Motivational\n- Alien\n- Villain\n- Emotional\n- Reporter\n- Conspiracy\n\nSave the role in the database.\n\nDo not change the Anchor role.\nDo not change anything else."
         ]
       },
       "acceptanceCriteria": [
-        "`backend/main.mo` `type Player` includes `role : Text`.",
-        "`createRoom` initializes the host player with `role = \"\"`.",
-        "`joinRoom` initializes the joining player with `role = \"\"`.",
-        "No other backend behavior changes (room creation/join/start game/chat/state APIs behave the same aside from the additional field being present in returned `RoomState`)."
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "text": "Update generated frontend/backend type bindings (as needed) so the frontend compiles with the updated `Player` type that now includes the `role` field, without introducing any new UI behavior or user-facing text.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "recent-messages"
-        ],
-        "quotes": [
-          "Do not change anything else."
-        ]
-      },
-      "acceptanceCriteria": [
-        "TypeScript compilation succeeds after the backend `Player` type changes.",
-        "No new screens, components, or visible UI changes are introduced; the app renders and functions as before."
+        "When `startGame` is called successfully, exactly one player has `role` equal to `\"Anchor\"`.",
+        "All non-Anchor players have `role` set to one of: `\"Overly Dramatic\"`, `\"Suspicious\"`, `\"Motivational\"`, `\"Alien\"`, `\"Villain\"`, `\"Emotional\"`, `\"Reporter\"`, `\"Conspiracy\"`.",
+        "The Anchor’s `role` value is not modified by the non-Anchor role assignment step.",
+        "The assigned non-Anchor roles are persisted so that a subsequent `getRoomState(roomCode)` returns the updated `players[].role` values.",
+        "No other room or player fields are changed by this update beyond what the current `startGame` already changes (e.g., do not modify `isAnchor`, `personalityCard`, `hostId`, `chatMessages`, player ordering, or validations).",
+        "Role assignment for non-Anchor players does not enforce uniqueness unless it already exists in the current `startGame` behavior (duplicates are allowed)."
       ]
     }
   ],
   "constraints": [
-    "Keep the backend as a single Motoko actor in `backend/main.mo`.",
-    "Do not introduce any new gameplay logic (e.g., role assignment rules) beyond adding the `role` field with an empty-string default.",
-    "Do not modify any user-facing text."
+    "Backend must remain a single Motoko actor with all logic in `backend/main.mo`.",
+    "Do not introduce new user-facing text beyond what already exists; any new text (e.g., error messages) must be in English.",
+    "Do not change the Anchor role assignment behavior other than adding role assignment for non-Anchor players.",
+    "Do not change any other game logic, room schema, or frontend behavior."
   ],
   "nonGoals": [
-    "Implementing the full role system (Anchor/personality cards) or any secret-role visibility rules.",
-    "Changing room phases or navigation behavior.",
-    "Adding any new frontend display of the `role` field."
+    "Changing how the Anchor is selected (e.g., improving randomness for the Anchor selection).",
+    "Adding new frontend UI to display or explain the newly assigned roles.",
+    "Enforcing uniqueness of non-Anchor roles across players.",
+    "Adding Personality Cards or any additional game phases/logic beyond role assignment."
   ],
   "imageRequirements": {
     "required": [],

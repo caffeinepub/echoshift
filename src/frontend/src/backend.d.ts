@@ -8,24 +8,24 @@ export interface None {
 }
 export type Option<T> = Some<T> | None;
 export type PlayerId = string;
-export interface RoomState {
+export type Time = bigint;
+export interface RoomStateView {
     chatMessages: Array<ChatMessage>;
-    players: Array<Player>;
+    players: Array<PlayerView>;
     phase: Variant_results_waiting_chatting_guessing;
     hostId: PlayerId;
     roomCode: RoomCode;
 }
-export interface Player {
+export type RoomCode = string;
+export interface PersonalityCard {
+    trait: string;
+}
+export interface PlayerView {
     id: PlayerId;
     name: string;
     role: string;
     personalityCard?: PersonalityCard;
     isAnchor: boolean;
-}
-export type Time = bigint;
-export type RoomCode = string;
-export interface PersonalityCard {
-    trait: string;
 }
 export interface ChatMessage {
     sender: string;
@@ -39,8 +39,9 @@ export enum Variant_results_waiting_chatting_guessing {
     guessing = "guessing"
 }
 export interface backendInterface {
+    assignRoleToPlayer(roomCode: RoomCode, playerId: PlayerId, role: string): Promise<void>;
     createRoom(hostId: PlayerId, hostName: string, roomCode: RoomCode): Promise<void>;
-    getRoomState(roomCode: RoomCode): Promise<RoomState>;
+    getRoomState(roomCode: RoomCode): Promise<RoomStateView>;
     joinRoom(roomCode: RoomCode, playerId: PlayerId, playerName: string): Promise<void>;
     sendMessage(roomCode: RoomCode, sender: string, message: string): Promise<void>;
     startGame(roomCode: RoomCode, hostId: PlayerId): Promise<void>;

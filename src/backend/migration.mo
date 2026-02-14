@@ -1,69 +1,56 @@
 import Map "mo:core/Map";
+import List "mo:core/List";
 import Array "mo:core/Array";
 import Text "mo:core/Text";
+import Int "mo:core/Int";
 
 module {
-  type RoomCode = Text;
-  type PlayerId = Text;
-
-  type PersonalityCard = {
-    trait : Text;
-  };
-
   type OldPlayer = {
-    id : PlayerId;
+    id : Text;
     name : Text;
     isAnchor : Bool;
-    personalityCard : ?PersonalityCard;
+    personalityCard : ?{ trait : Text };
+    role : Text;
   };
 
-  type ChatMessage = {
+  type OldChatMessage = {
     sender : Text;
     message : Text;
     timestamp : Int;
   };
 
   type OldRoomState = {
-    roomCode : RoomCode;
-    hostId : PlayerId;
+    roomCode : Text;
+    hostId : Text;
     players : [OldPlayer];
-    chatMessages : [ChatMessage];
+    chatMessages : [OldChatMessage];
     phase : { #waiting; #chatting; #guessing; #results };
   };
 
   type OldActor = {
-    rooms : Map.Map<RoomCode, OldRoomState>;
-  };
-
-  type NewPlayer = {
-    id : PlayerId;
-    name : Text;
-    isAnchor : Bool;
-    personalityCard : ?PersonalityCard;
-    role : Text;
-  };
-
-  type NewRoomState = {
-    roomCode : RoomCode;
-    hostId : PlayerId;
-    players : [NewPlayer];
-    chatMessages : [ChatMessage];
-    phase : { #waiting; #chatting; #guessing; #results };
+    rooms : Map.Map<Text, OldRoomState>;
   };
 
   type NewActor = {
-    rooms : Map.Map<RoomCode, NewRoomState>;
+    rooms : Map.Map<Text, NewRoomState>;
+  };
+
+  type NewRoomState = {
+    roomCode : Text;
+    hostId : Text;
+    players : List.List<OldPlayer>;
+    chatMessages : List.List<OldChatMessage>;
+    phase : { #waiting; #chatting; #guessing; #results };
   };
 
   public func run(old : OldActor) : NewActor {
-    let newRooms = old.rooms.map<RoomCode, OldRoomState, NewRoomState>(
+    let newRooms = old.rooms.map<Text, OldRoomState, NewRoomState>(
       func(_code, oldRoom) {
-        let newPlayers = oldRoom.players.map(
-          func(oldPlayer) {
-            { oldPlayer with role = "" };
-          }
-        );
-        { oldRoom with players = newPlayers };
+        {
+          oldRoom with
+          players = List.fromArray(oldRoom.players);
+          chatMessages = List.fromArray(oldRoom.chatMessages);
+        };
       }
     );
     { rooms = newRooms };

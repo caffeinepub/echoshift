@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Add a new `role` text field to each backend `Player` record (defaulting to `""`) while keeping app behavior and UI unchanged.
+**Goal:** Assign a random non-Anchor role to every non-Anchor player when a game starts, and persist those roles in the room state.
 
 **Planned changes:**
-- Update `backend/main.mo` `type Player` to include `role : Text`.
-- Initialize `role = ""` for players created via `createRoom` and `joinRoom`.
-- Regenerate/update frontend/backend type bindings as needed so the frontend compiles with the updated `Player` type, without introducing any UI changes.
+- Update backend `startGame(roomCode, hostId)` so that after the existing Anchor assignment, each other player is assigned exactly one random role from: `Overly Dramatic`, `Suspicious`, `Motivational`, `Alien`, `Villain`, `Emotional`, `Reporter`, `Conspiracy`.
+- Persist the assigned non-Anchor roles so `getRoomState(roomCode)` returns updated `players[].role` values.
+- Ensure the Anchor’s `role` is not modified and no other room/player fields are changed beyond what `startGame` already changes.
 
-**User-visible outcome:** No visible UI changes; the app behaves the same, with player data now including an additional `role` field (empty by default).
+**User-visible outcome:** Starting a game results in one Anchor and all other players automatically having a saved random role from the provided list (reflected in subsequent room state reads).

@@ -1,21 +1,4 @@
 {
   "kind": "feature_evidence_report",
-  "features": [
-    {
-      "featureId": "feature-update-generated-frontend-backend-type-bindings-as-needed-so-the-frontend-compiles-with-the-updated-player-type-that-now-includes-the-role-field-without-introducing-any-new-ui-behavior-or-user-facing-text",
-      "featureTitle": "Update generated frontend/backend type bindings (as needed) so the frontend compiles with the updated `Player` type that now includes the `role` field, without introducing any new UI behavior or user-facing text.",
-      "files": [],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-11"
-      ],
-      "confidence": "high"
-    }
-  ]
+  "features": []
 }

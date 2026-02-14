@@ -16,18 +16,18 @@ export interface ChatMessage {
   'timestamp' : Time,
 }
 export interface PersonalityCard { 'trait' : string }
-export interface Player {
+export type PlayerId = string;
+export interface PlayerView {
   'id' : PlayerId,
   'name' : string,
   'role' : string,
   'personalityCard' : [] | [PersonalityCard],
   'isAnchor' : boolean,
 }
-export type PlayerId = string;
 export type RoomCode = string;
-export interface RoomState {
+export interface RoomStateView {
   'chatMessages' : Array<ChatMessage>,
-  'players' : Array<Player>,
+  'players' : Array<PlayerView>,
   'phase' : { 'results' : null } |
     { 'waiting' : null } |
     { 'chatting' : null } |
@@ -37,8 +37,9 @@ export interface RoomState {
 }
 export type Time = bigint;
 export interface _SERVICE {
+  'assignRoleToPlayer' : ActorMethod<[RoomCode, PlayerId, string], undefined>,
   'createRoom' : ActorMethod<[PlayerId, string, RoomCode], undefined>,
-  'getRoomState' : ActorMethod<[RoomCode], RoomState>,
+  'getRoomState' : ActorMethod<[RoomCode], RoomStateView>,
   'joinRoom' : ActorMethod<[RoomCode, PlayerId, string], undefined>,
   'sendMessage' : ActorMethod<[RoomCode, string, string], undefined>,
   'startGame' : ActorMethod<[RoomCode, PlayerId], undefined>,

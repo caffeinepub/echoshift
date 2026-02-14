@@ -1,33 +1,21 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T08:43:42.317Z",
+  "generatedAt": "2026-02-14T09:08:04.048Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 1,
+    "total": 1,
+    "implemented": 0,
     "items": [
       {
-        "id": "REQ-10",
-        "summary": "Add a new field named `role` of type `Text` to the backend `Player` record stored in each room, with a default value of the empty string (`\"\"`) for newly created and newly joined players.",
+        "id": "REQ-13",
+        "summary": "Update the backend `startGame(roomCode, hostId)` logic so that after one player is assigned `role = \"Anchor\"`, every other player in the room is assigned exactly one random role from this list and persisted in the room state: `Overly Dramatic`, `Suspicious`, `Motivational`, `Alien`, `Villain`, `Emotional`, `Reporter`, `Conspiracy`.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
-      },
-      {
-        "id": "REQ-11",
-        "summary": "Update generated frontend/backend type bindings (as needed) so the frontend compiles with the updated `Player` type that now includes the `role` field, without introducing any new UI behavior or user-facing text.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/backend.d.ts",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/backend.d.ts"
-        ]
       }
     ]
   },
@@ -35,13 +23,15 @@
     "backend/main.mo",
     "backend/migration.mo",
     "build-request.json",
-    "build-template/README.md",
     "feature_evidence.json",
+    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
+    "frontend/src/echoshift/api/useRoomState.ts",
+    "frontend/src/echoshift/screens/GameChatScreen.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",
