@@ -3,11 +3,12 @@ import { useSession } from './echoshift/state/session';
 import { useRoomState } from './echoshift/api/useRoomState';
 import HomeScreen from './echoshift/screens/HomeScreen';
 import LobbyScreen from './echoshift/screens/LobbyScreen';
+import TopicSelectionScreen from './echoshift/screens/TopicSelectionScreen';
 import GameChatScreen from './echoshift/screens/GameChatScreen';
 import GuessingScreen from './echoshift/screens/GuessingScreen';
 import ResultsScreen from './echoshift/screens/ResultsScreen';
 import { Toaster } from '@/components/ui/sonner';
-import { Variant_results_waiting_chatting_guessing } from './backend';
+import { Phase } from './backend';
 
 export default function App() {
   const { roomCode, playerId, screen, setScreen } = useSession();
@@ -19,13 +20,15 @@ export default function App() {
 
     const phase = roomState.phase;
     
-    if (phase === Variant_results_waiting_chatting_guessing.waiting && screen !== 'lobby') {
+    if (phase === Phase.waiting && screen !== 'lobby') {
       setScreen('lobby');
-    } else if (phase === Variant_results_waiting_chatting_guessing.chatting && screen !== 'chat') {
+    } else if (phase === Phase.topicSelection && screen !== 'topicSelection') {
+      setScreen('topicSelection');
+    } else if (phase === Phase.chatting && screen !== 'chat') {
       setScreen('chat');
-    } else if (phase === Variant_results_waiting_chatting_guessing.guessing && screen !== 'guessing') {
+    } else if (phase === Phase.guessing && screen !== 'guessing') {
       setScreen('guessing');
-    } else if (phase === Variant_results_waiting_chatting_guessing.results && screen !== 'results') {
+    } else if (phase === Phase.results && screen !== 'results') {
       setScreen('results');
     }
   }, [roomState, roomCode, screen, setScreen]);
@@ -38,6 +41,8 @@ export default function App() {
     switch (screen) {
       case 'lobby':
         return <LobbyScreen />;
+      case 'topicSelection':
+        return <TopicSelectionScreen />;
       case 'chat':
         return <GameChatScreen />;
       case 'guessing':

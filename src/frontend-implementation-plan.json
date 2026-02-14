@@ -1,6 +1,98 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Assign random non-Anchor roles on game start (frontend-only plan)",
-  "requirements": []
+  "title": "Results screen role reveals, scoring, summaries, and Play Again flow",
+  "requirements": [
+    {
+      "id": "REQ-32",
+      "summary": "Render all players on Results with revealed roles using Anchor label or Personality Card name rules.",
+      "acceptanceCriteria": [
+        "On frontend/src/echoshift/screens/ResultsScreen.tsx, all players in roomState.players are rendered (including the Anchor).",
+        "For the Anchor row, the role label is exactly \"Anchor\".",
+        "For non-Anchor rows, the UI displays the player.role value as their Personality Card name (no hidden/blank placeholder).",
+        "All user-facing text on the Results screen is in English.",
+        "Layout uses clean, readable, soft rounded cards consistent with existing theme."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/echoshift/screens/ResultsScreen.tsx",
+          "operation": "modify",
+          "description": "Update Results UI to render every roomState.players row (including Anchor) and display role label per rules: role === \"Anchor\" => \"Anchor\", otherwise show player.role as the Personality Card name. Use shadcn-ui Card/Badge (soft rounded styling) for readable role reveal layout; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-33",
+      "summary": "Visually indicate which players were selected by the Anchor and whether each selection was correct using roomState.guesses.",
+      "acceptanceCriteria": [
+        "A player row clearly indicates whether they were selected by the Anchor (derived from roomState.guesses[*].targetId).",
+        "Selected players are visually highlighted using a distinct style (e.g., border/background) while keeping soft rounded cards.",
+        "The UI differentiates correct vs incorrect selections, based on the game rule that a correct guess is selecting a non-Anchor player (player.role != \"Anchor\").",
+        "The Results screen remains readable on mobile (no horizontal scrolling required)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/echoshift/screens/ResultsScreen.tsx",
+          "operation": "modify",
+          "description": "Derive selectedPlayerIds from roomState.guesses[*].targetId, and for each player row show selected vs not selected plus correct vs incorrect status (correct iff selected and player.role !== \"Anchor\"). Apply distinct but theme-consistent highlight styles on selected rows (e.g., background/border) using existing Tailwind + shadcn-ui Card/Badge; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-34",
+      "summary": "Compute and display per-player earned points on Results from roomState guesses and roles (client-side only).",
+      "acceptanceCriteria": [
+        "Anchor points displayed equals the count of roomState.guesses whose targetId corresponds to a player with role != \"Anchor\".",
+        "Each non-Anchor player shows 1 point if their id is not present in roomState.guesses[*].targetId; otherwise shows 0 points.",
+        "Point totals are computed client-side from roomState (no new persistence required for points).",
+        "All displayed scoring copy is in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/echoshift/screens/ResultsScreen.tsx",
+          "operation": "modify",
+          "description": "Add client-side scoring derivations: compute correctGuessCount from selected targetIds that map to players with role !== \"Anchor\"; display Anchor earned points as correctGuessCount; display each non-Anchor player's points as 1 when not selected else 0. Render points alongside each player row using shadcn-ui Badge/typography patterns; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-35",
+      "summary": "Add Results summary line and per-player survivor messaging with exact English phrasing.",
+      "acceptanceCriteria": [
+        "A summary line is shown on the Results screen with the exact format \"Anchor guessed X/Y correctly!\" (X and Y are numbers).",
+        "For each non-Anchor player not selected by the Anchor, the UI displays the exact sentence \"[PlayerName] survived without being caught!\" with the player’s current name substituted.",
+        "All user-facing text is in English and matches the requested phrasing for the provided examples."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/echoshift/screens/ResultsScreen.tsx",
+          "operation": "modify",
+          "description": "Add top-level summary text exactly \"Anchor guessed X/Y correctly!\" where X is correctGuessCount and Y is total non-Anchor players. For each non-Anchor player not selected, render the exact sentence \"[PlayerName] survived without being caught!\" within that player's row (or a clearly associated subline) using existing theme styling; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-36",
+      "summary": "Add Play Again button to reset the room to Lobby via backend playAgain and refetch room state without clearing the session.",
+      "acceptanceCriteria": [
+        "Results screen shows a button labeled exactly \"Play Again\".",
+        "Clicking \"Play Again\" triggers a backend update method that resets the room to a lobby-ready state (phase becomes #waiting and per-round state is cleared, including: chatMessages, generatedTopics, votes, selectedTopic, topicSelectionStartTime, chatCountdownStartTime, guesses).",
+        "After the backend reset succeeds, the frontend invalidates/refetches room state so that all connected clients transition to the Lobby via the existing App.tsx phase-to-screen logic.",
+        "If the backend reset fails, the frontend shows an English toast error message and does not change local session state.",
+        "The \"Play Again\" action does not call useSession().reset() (which returns users to Home and clears roomCode); it keeps users in the same room and returns them to Lobby instead."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/echoshift/api/usePlayAgain.ts",
+          "operation": "create",
+          "description": "Create a React Query mutation hook that calls the backend capability actor.playAgain(roomCode) and, on success, invalidates the roomState query so phase-based routing returns clients to Lobby; on error, show an English toast message via sonner. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/echoshift/screens/ResultsScreen.tsx",
+          "operation": "modify",
+          "description": "Replace the current \"Return Home\" behavior with a button labeled exactly \"Play Again\" that uses the new usePlayAgain hook (do not call useSession().reset()). Disable or show loading state while pending, and show English toast on failure (handled by the hook). Use shadcn-ui Button for consistent styling; verify the component's usage instructions before implementing."
+        }
+      ]
+    }
+  ]
 }

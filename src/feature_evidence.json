@@ -1,4 +1,96 @@
 {
   "kind": "feature_evidence_report",
-  "features": []
+  "features": [
+    {
+      "featureId": "feature-update-the-results-screen-ui-to-show-every-player-with-their-revealed-role-using-these-exact-rules-a-if-player-role-is-exactly-anchor-display-role-label-anchor-b-otherwise-display-the-player-s-personality-card-use-the-player-role-string-as-the-personality-card-name",
+      "featureTitle": "Update the Results screen UI to show every player with their revealed role using these exact rules: (a) if player.role is exactly \"Anchor\", display role label \"Anchor\"; (b) otherwise display the player’s Personality Card (use the player.role string as the Personality Card name).",
+      "files": [
+        "frontend/src/echoshift/screens/ResultsScreen.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-32"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-on-the-results-screen-highlight-which-players-were-guessed-by-the-anchor-and-which-of-those-guesses-were-correct-using-the-persisted-roomstate-guesses-list-as-the-source-of-truth-for-who-was-selected",
+      "featureTitle": "On the Results screen, highlight which players were guessed by the Anchor and which of those guesses were correct, using the persisted roomState.guesses list as the source of truth for who was selected.",
+      "files": [
+        "frontend/src/echoshift/screens/ResultsScreen.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-33"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-compute-and-display-points-on-the-results-screen-using-these-rules-anchor-gets-1-point-for-each-correct-guess-each-non-anchor-weird-player-gets-1-point-if-the-anchor-did-not-guess-them-show-each-player-s-earned-points-alongside-their-row",
+      "featureTitle": "Compute and display points on the Results screen using these rules: Anchor gets 1 point for each correct guess; each non-Anchor (\"Weird\") player gets 1 point if the Anchor did NOT guess them. Show each player’s earned points alongside their row.",
+      "files": [
+        "frontend/src/echoshift/screens/ResultsScreen.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-34"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-summary-messaging-on-the-results-screen-a-display-a-top-level-summary-like-anchor-guessed-x-y-correctly-where-x-is-the-correct-guess-count-and-y-is-the-total-number-of-non-anchor-players-b-display-per-player-outcome-messaging-for-non-anchor-players-including-playername-survived-without-being-caught-when-that-player-was-not-guessed",
+      "featureTitle": "Add summary messaging on the Results screen: (a) display a top-level summary like \"Anchor guessed X/Y correctly!\" where X is the correct guess count and Y is the total number of non-Anchor players; (b) display per-player outcome messaging for non-Anchor players including \"[PlayerName] survived without being caught!\" when that player was not guessed.",
+      "files": [
+        "frontend/src/echoshift/screens/ResultsScreen.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-35"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-a-play-again-button-on-the-results-screen-that-returns-the-room-to-the-lobby-for-all-players-by-resetting-the-room-s-phase-and-per-round-state-on-the-backend-then-letting-the-existing-phase-based-screen-auto-transition-move-clients-to-lobby",
+      "featureTitle": "Implement a \"Play Again\" button on the Results screen that returns the room to the Lobby for all players by resetting the room’s phase and per-round state on the backend, then letting the existing phase-based screen auto-transition move clients to Lobby.",
+      "files": [
+        "frontend/src/echoshift/api/usePlayAgain.ts",
+        "frontend/src/echoshift/screens/ResultsScreen.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-36"
+      ],
+      "confidence": "high"
+    }
+  ]
 }

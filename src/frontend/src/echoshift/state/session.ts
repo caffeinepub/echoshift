@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type Screen = 'home' | 'lobby' | 'chat' | 'guessing' | 'results';
+export type Screen = 'home' | 'lobby' | 'topicSelection' | 'chat' | 'guessing' | 'results';
 
 interface SessionState {
   playerId: string | null;

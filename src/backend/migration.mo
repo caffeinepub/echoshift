@@ -1,56 +1,88 @@
 import Map "mo:core/Map";
 import List "mo:core/List";
-import Array "mo:core/Array";
 import Text "mo:core/Text";
-import Int "mo:core/Int";
+import Time "mo:core/Time";
+import Nat "mo:core/Nat";
+import Bool "mo:core/Bool";
 
 module {
-  type OldPlayer = {
-    id : Text;
+  type RoomCode = Text;
+  type PlayerId = Text;
+
+  type PersonalityCard = {
+    trait : Text;
+  };
+
+  type Player = {
+    id : PlayerId;
     name : Text;
     isAnchor : Bool;
-    personalityCard : ?{ trait : Text };
+    personalityCard : ?PersonalityCard;
     role : Text;
   };
 
-  type OldChatMessage = {
+  type ChatMessage = {
     sender : Text;
     message : Text;
-    timestamp : Int;
+    timestamp : Time.Time;
+  };
+
+  type Topic = {
+    question : Text;
+  };
+
+  type TopicVote = {
+    playerId : PlayerId;
+    topicIndex : Nat;
+  };
+
+  type Phase = {
+    #waiting;
+    #topicSelection;
+    #chatting;
+    #guessing;
+    #results;
+  };
+
+  type Guess = {
+    guesserId : PlayerId;
+    targetId : PlayerId;
+    guess : Text;
   };
 
   type OldRoomState = {
-    roomCode : Text;
-    hostId : Text;
-    players : [OldPlayer];
-    chatMessages : [OldChatMessage];
-    phase : { #waiting; #chatting; #guessing; #results };
-  };
-
-  type OldActor = {
-    rooms : Map.Map<Text, OldRoomState>;
-  };
-
-  type NewActor = {
-    rooms : Map.Map<Text, NewRoomState>;
+    roomCode : RoomCode;
+    hostId : PlayerId;
+    players : List.List<Player>;
+    chatMessages : List.List<ChatMessage>;
+    phase : Phase;
+    generatedTopics : [Topic];
+    votes : List.List<TopicVote>;
+    selectedTopic : ?Topic;
+    topicSelectionStartTime : ?Time.Time;
+    chatCountdownStartTime : ?Time.Time;
+    guesses : List.List<Guess>;
   };
 
   type NewRoomState = {
-    roomCode : Text;
-    hostId : Text;
-    players : List.List<OldPlayer>;
-    chatMessages : List.List<OldChatMessage>;
-    phase : { #waiting; #chatting; #guessing; #results };
+    roomCode : RoomCode;
+    hostId : PlayerId;
+    players : List.List<Player>;
+    chatMessages : List.List<ChatMessage>;
+    phase : Phase;
+    generatedTopics : [Topic];
+    votes : List.List<TopicVote>;
+    selectedTopic : ?Topic;
+    topicSelectionStartTime : ?Time.Time;
+    chatCountdownStartTime : ?Time.Time;
+    guesses : List.List<Guess>;
+    roundNumber : Nat;
   };
 
-  public func run(old : OldActor) : NewActor {
-    let newRooms = old.rooms.map<Text, OldRoomState, NewRoomState>(
+  public func run(old : { rooms : Map.Map<RoomCode, OldRoomState> }) : { rooms : Map.Map<RoomCode, NewRoomState> } {
+    let newRooms = old.rooms.map<RoomCode, OldRoomState, NewRoomState>(
       func(_code, oldRoom) {
-        {
-          oldRoom with
-          players = List.fromArray(oldRoom.players);
-          chatMessages = List.fromArray(oldRoom.chatMessages);
-        };
+        { oldRoom with roundNumber = 0 };
       }
     );
     { rooms = newRooms };

@@ -1,54 +1,135 @@
 {
   "kind": "build_request",
-  "title": "Assign random non-Anchor roles on game start",
+  "title": "Enhance Results screen with role reveals, scoring, summary messages, and Play Again flow",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-13",
-      "text": "Update the backend `startGame(roomCode, hostId)` logic so that after one player is assigned `role = \"Anchor\"`, every other player in the room is assigned exactly one random role from this list and persisted in the room state: `Overly Dramatic`, `Suspicious`, `Motivational`, `Alien`, `Villain`, `Emotional`, `Reporter`, `Conspiracy`.",
-      "target": "backend",
+      "id": "REQ-32",
+      "text": "Update the Results screen UI to show every player with their revealed role using these exact rules: (a) if player.role is exactly \"Anchor\", display role label \"Anchor\"; (b) otherwise display the player’s Personality Card (use the player.role string as the Personality Card name).",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-3"
         ],
         "quotes": [
-          "After assigning one player as \"Anchor\":\n\nFor all other players in the room:\n\nAssign one random role from this list:\n\n- Overly Dramatic\n- Suspicious\n- Motivational\n- Alien\n- Villain\n- Emotional\n- Reporter\n- Conspiracy\n\nSave the role in the database.\n\nDo not change the Anchor role.\nDo not change anything else."
+          "Show each player with their role:\n\n- Anchor → show as \"Anchor\"\n- Others → show their Personality Card"
         ]
       },
       "acceptanceCriteria": [
-        "When `startGame` is called successfully, exactly one player has `role` equal to `\"Anchor\"`.",
-        "All non-Anchor players have `role` set to one of: `\"Overly Dramatic\"`, `\"Suspicious\"`, `\"Motivational\"`, `\"Alien\"`, `\"Villain\"`, `\"Emotional\"`, `\"Reporter\"`, `\"Conspiracy\"`.",
-        "The Anchor’s `role` value is not modified by the non-Anchor role assignment step.",
-        "The assigned non-Anchor roles are persisted so that a subsequent `getRoomState(roomCode)` returns the updated `players[].role` values.",
-        "No other room or player fields are changed by this update beyond what the current `startGame` already changes (e.g., do not modify `isAnchor`, `personalityCard`, `hostId`, `chatMessages`, player ordering, or validations).",
-        "Role assignment for non-Anchor players does not enforce uniqueness unless it already exists in the current `startGame` behavior (duplicates are allowed)."
+        "On frontend/src/echoshift/screens/ResultsScreen.tsx, all players in roomState.players are rendered (including the Anchor).",
+        "For the Anchor row, the role label is exactly \"Anchor\".",
+        "For non-Anchor rows, the UI displays the player.role value as their Personality Card name (no hidden/blank placeholder).",
+        "All user-facing text on the Results screen is in English.",
+        "Layout uses clean, readable, soft rounded cards consistent with existing theme."
+      ]
+    },
+    {
+      "id": "REQ-33",
+      "text": "On the Results screen, highlight which players were guessed by the Anchor and which of those guesses were correct, using the persisted roomState.guesses list as the source of truth for who was selected.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "Highlight which players were guessed correctly by the Anchor."
+        ]
+      },
+      "acceptanceCriteria": [
+        "A player row clearly indicates whether they were selected by the Anchor (derived from roomState.guesses[*].targetId).",
+        "Selected players are visually highlighted using a distinct style (e.g., border/background) while keeping soft rounded cards.",
+        "The UI differentiates correct vs incorrect selections, based on the game rule that a correct guess is selecting a non-Anchor player (player.role != \"Anchor\").",
+        "The Results screen remains readable on mobile (no horizontal scrolling required)."
+      ]
+    },
+    {
+      "id": "REQ-34",
+      "text": "Compute and display points on the Results screen using these rules: Anchor gets 1 point for each correct guess; each non-Anchor (\"Weird\") player gets 1 point if the Anchor did NOT guess them. Show each player’s earned points alongside their row.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "Award points:\n\n- Anchor gets 1 point for each correct guess.\n- Each \"Weird\" player gets 1 point if Anchor did NOT guess them."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Anchor points displayed equals the count of roomState.guesses whose targetId corresponds to a player with role != \"Anchor\".",
+        "Each non-Anchor player shows 1 point if their id is not present in roomState.guesses[*].targetId; otherwise shows 0 points.",
+        "Point totals are computed client-side from roomState (no new persistence required for points).",
+        "All displayed scoring copy is in English."
+      ]
+    },
+    {
+      "id": "REQ-35",
+      "text": "Add summary messaging on the Results screen: (a) display a top-level summary like \"Anchor guessed X/Y correctly!\" where X is the correct guess count and Y is the total number of non-Anchor players; (b) display per-player outcome messaging for non-Anchor players including \"[PlayerName] survived without being caught!\" when that player was not guessed.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "Display a summary message:\n\n- Example: \"Anchor guessed 2/3 correctly!\"  \n- Example: \"BlueTiger42 survived without being caught!\""
+        ]
+      },
+      "acceptanceCriteria": [
+        "A summary line is shown on the Results screen with the exact format \"Anchor guessed X/Y correctly!\" (X and Y are numbers).",
+        "For each non-Anchor player not selected by the Anchor, the UI displays the exact sentence \"[PlayerName] survived without being caught!\" with the player’s current name substituted.",
+        "All user-facing text is in English and matches the requested phrasing for the provided examples."
+      ]
+    },
+    {
+      "id": "REQ-36",
+      "text": "Implement a \"Play Again\" button on the Results screen that returns the room to the Lobby for all players by resetting the room’s phase and per-round state on the backend, then letting the existing phase-based screen auto-transition move clients to Lobby.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "Add a \"Play Again\" button to go back to Lobby."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Results screen shows a button labeled exactly \"Play Again\".",
+        "Clicking \"Play Again\" triggers a backend update method that resets the room to a lobby-ready state (phase becomes #waiting and per-round state is cleared, including: chatMessages, generatedTopics, votes, selectedTopic, topicSelectionStartTime, chatCountdownStartTime, guesses).",
+        "After the backend reset succeeds, the frontend invalidates/refetches room state so that all connected clients transition to the Lobby via the existing App.tsx phase-to-screen logic.",
+        "If the backend reset fails, the frontend shows an English toast error message and does not change local session state.",
+        "The \"Play Again\" action does not call useSession().reset() (which returns users to Home and clears roomCode); it keeps users in the same room and returns them to Lobby instead."
+      ]
+    },
+    {
+      "id": "REQ-37",
+      "text": "Fix backend guessing correctness counting so that submitGuesses returns a correctCount consistent with the current game rule: a guess is correct if the guessed target is a non-Anchor player (player.role != \"Anchor\"), regardless of Guess.guess text value.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "Highlight which players were guessed correctly by the Anchor.\n\nAward points:\n\n- Anchor gets 1 point for each correct guess."
+        ]
+      },
+      "acceptanceCriteria": [
+        "In backend/main.mo, submitGuesses computes correctCount as the number of guessed targetIds that belong to players whose role is not \"Anchor\".",
+        "submitGuesses continues to persist guesses to room state and advance the room phase to #results.",
+        "The change does not require a state migration (no new persisted fields introduced)."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor with all logic in `backend/main.mo`.",
-    "Do not introduce new user-facing text beyond what already exists; any new text (e.g., error messages) must be in English.",
-    "Do not change the Anchor role assignment behavior other than adding role assignment for non-Anchor players.",
-    "Do not change any other game logic, room schema, or frontend behavior."
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not edit frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "All user-facing text must be in English."
   ],
   "nonGoals": [
-    "Changing how the Anchor is selected (e.g., improving randomness for the Anchor selection).",
-    "Adding new frontend UI to display or explain the newly assigned roles.",
-    "Enforcing uniqueness of non-Anchor roles across players.",
-    "Adding Personality Cards or any additional game phases/logic beyond role assignment."
+    "Do not add third-party authentication or external databases.",
+    "Do not introduce real-time WebSocket subscriptions (keep polling via React Query).",
+    "Do not redesign earlier screens beyond what is needed to support the updated Results screen and Play Again flow."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

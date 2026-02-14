@@ -91,12 +91,26 @@ export class ExternalBlob {
 }
 export type PlayerId = string;
 export type Time = bigint;
+export interface GuessingResult {
+    correctCount: bigint;
+    guesses: Array<Guess>;
+}
 export interface RoomStateView {
+    selectedTopic?: Topic;
+    generatedTopics: Array<Topic>;
+    votes: Array<TopicVote>;
     chatMessages: Array<ChatMessage>;
+    chatCountdownStartTime?: Time;
     players: Array<PlayerView>;
-    phase: Variant_results_waiting_chatting_guessing;
+    phase: Phase;
     hostId: PlayerId;
     roomCode: RoomCode;
+    roundNumber: bigint;
+    topicSelectionStartTime?: Time;
+    guesses: Array<Guess>;
+}
+export interface Topic {
+    question: string;
 }
 export type RoomCode = string;
 export interface PersonalityCard {
@@ -109,39 +123,53 @@ export interface PlayerView {
     personalityCard?: PersonalityCard;
     isAnchor: boolean;
 }
+export interface Guess {
+    guess: string;
+    targetId: PlayerId;
+    guesserId: PlayerId;
+}
 export interface ChatMessage {
     sender: string;
     message: string;
     timestamp: Time;
 }
-export enum Variant_results_waiting_chatting_guessing {
+export interface TopicVote {
+    playerId: PlayerId;
+    topicIndex: bigint;
+}
+export enum Phase {
     results = "results",
+    topicSelection = "topicSelection",
     waiting = "waiting",
     chatting = "chatting",
     guessing = "guessing"
 }
 export interface backendInterface {
-    assignRoleToPlayer(roomCode: RoomCode, playerId: PlayerId, role: string): Promise<void>;
+    checkAndAdvancePhase(roomCode: RoomCode): Promise<void>;
     createRoom(hostId: PlayerId, hostName: string, roomCode: RoomCode): Promise<void>;
+    getRoomPhase(roomCode: RoomCode): Promise<Phase>;
     getRoomState(roomCode: RoomCode): Promise<RoomStateView>;
     joinRoom(roomCode: RoomCode, playerId: PlayerId, playerName: string): Promise<void>;
+    playAgain(roomCode: RoomCode): Promise<void>;
     sendMessage(roomCode: RoomCode, sender: string, message: string): Promise<void>;
     startGame(roomCode: RoomCode, hostId: PlayerId): Promise<void>;
+    submitGuesses(roomCode: RoomCode, guesses: Array<Guess>): Promise<GuessingResult>;
+    voteForTopic(roomCode: RoomCode, playerId: PlayerId, topicIndex: bigint): Promise<void>;
 }
-import type { ChatMessage as _ChatMessage, PersonalityCard as _PersonalityCard, PlayerId as _PlayerId, PlayerView as _PlayerView, RoomCode as _RoomCode, RoomStateView as _RoomStateView } from "./declarations/backend.did.d.ts";
+import type { ChatMessage as _ChatMessage, Guess as _Guess, PersonalityCard as _PersonalityCard, Phase as _Phase, PlayerId as _PlayerId, PlayerView as _PlayerView, RoomCode as _RoomCode, RoomStateView as _RoomStateView, Time as _Time, Topic as _Topic, TopicVote as _TopicVote } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
-    async assignRoleToPlayer(arg0: RoomCode, arg1: PlayerId, arg2: string): Promise<void> {
+    async checkAndAdvancePhase(arg0: RoomCode): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.assignRoleToPlayer(arg0, arg1, arg2);
+                const result = await this.actor.checkAndAdvancePhase(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.assignRoleToPlayer(arg0, arg1, arg2);
+            const result = await this.actor.checkAndAdvancePhase(arg0);
             return result;
         }
     }
@@ -159,18 +187,32 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getRoomPhase(arg0: RoomCode): Promise<Phase> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getRoomPhase(arg0);
+                return from_candid_Phase_n1(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getRoomPhase(arg0);
+            return from_candid_Phase_n1(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async getRoomState(arg0: RoomCode): Promise<RoomStateView> {
         if (this.processError) {
             try {
                 const result = await this.actor.getRoomState(arg0);
-                return from_candid_RoomStateView_n1(this._uploadFile, this._downloadFile, result);
+                return from_candid_RoomStateView_n3(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getRoomState(arg0);
-            return from_candid_RoomStateView_n1(this._uploadFile, this._downloadFile, result);
+            return from_candid_RoomStateView_n3(this._uploadFile, this._downloadFile, result);
         }
     }
     async joinRoom(arg0: RoomCode, arg1: PlayerId, arg2: string): Promise<void> {
@@ -184,6 +226,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.joinRoom(arg0, arg1, arg2);
+            return result;
+        }
+    }
+    async playAgain(arg0: RoomCode): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.playAgain(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.playAgain(arg0);
             return result;
         }
     }
@@ -215,46 +271,96 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async submitGuesses(arg0: RoomCode, arg1: Array<Guess>): Promise<GuessingResult> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.submitGuesses(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.submitGuesses(arg0, arg1);
+            return result;
+        }
+    }
+    async voteForTopic(arg0: RoomCode, arg1: PlayerId, arg2: bigint): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.voteForTopic(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.voteForTopic(arg0, arg1, arg2);
+            return result;
+        }
+    }
 }
-function from_candid_PlayerView_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _PlayerView): PlayerView {
-    return from_candid_record_n5(_uploadFile, _downloadFile, value);
+function from_candid_Phase_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Phase): Phase {
+    return from_candid_variant_n2(_uploadFile, _downloadFile, value);
 }
-function from_candid_RoomStateView_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _RoomStateView): RoomStateView {
-    return from_candid_record_n2(_uploadFile, _downloadFile, value);
+function from_candid_PlayerView_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _PlayerView): PlayerView {
+    return from_candid_record_n9(_uploadFile, _downloadFile, value);
 }
-function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_PersonalityCard]): PersonalityCard | null {
+function from_candid_RoomStateView_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _RoomStateView): RoomStateView {
+    return from_candid_record_n4(_uploadFile, _downloadFile, value);
+}
+function from_candid_opt_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_PersonalityCard]): PersonalityCard | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_record_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_opt_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Topic]): Topic | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Time]): Time | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_record_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    selectedTopic: [] | [_Topic];
+    generatedTopics: Array<_Topic>;
+    votes: Array<_TopicVote>;
     chatMessages: Array<_ChatMessage>;
+    chatCountdownStartTime: [] | [_Time];
     players: Array<_PlayerView>;
-    phase: {
-        results: null;
-    } | {
-        waiting: null;
-    } | {
-        chatting: null;
-    } | {
-        guessing: null;
-    };
+    phase: _Phase;
     hostId: _PlayerId;
     roomCode: _RoomCode;
+    roundNumber: bigint;
+    topicSelectionStartTime: [] | [_Time];
+    guesses: Array<_Guess>;
 }): {
+    selectedTopic?: Topic;
+    generatedTopics: Array<Topic>;
+    votes: Array<TopicVote>;
     chatMessages: Array<ChatMessage>;
+    chatCountdownStartTime?: Time;
     players: Array<PlayerView>;
-    phase: Variant_results_waiting_chatting_guessing;
+    phase: Phase;
     hostId: PlayerId;
     roomCode: RoomCode;
+    roundNumber: bigint;
+    topicSelectionStartTime?: Time;
+    guesses: Array<Guess>;
 } {
     return {
+        selectedTopic: record_opt_to_undefined(from_candid_opt_n5(_uploadFile, _downloadFile, value.selectedTopic)),
+        generatedTopics: value.generatedTopics,
+        votes: value.votes,
         chatMessages: value.chatMessages,
-        players: from_candid_vec_n3(_uploadFile, _downloadFile, value.players),
-        phase: from_candid_variant_n7(_uploadFile, _downloadFile, value.phase),
+        chatCountdownStartTime: record_opt_to_undefined(from_candid_opt_n6(_uploadFile, _downloadFile, value.chatCountdownStartTime)),
+        players: from_candid_vec_n7(_uploadFile, _downloadFile, value.players),
+        phase: from_candid_Phase_n1(_uploadFile, _downloadFile, value.phase),
         hostId: value.hostId,
-        roomCode: value.roomCode
+        roomCode: value.roomCode,
+        roundNumber: value.roundNumber,
+        topicSelectionStartTime: record_opt_to_undefined(from_candid_opt_n6(_uploadFile, _downloadFile, value.topicSelectionStartTime)),
+        guesses: value.guesses
     };
 }
-function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_record_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     id: _PlayerId;
     name: string;
     role: string;
@@ -271,23 +377,25 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
         id: value.id,
         name: value.name,
         role: value.role,
-        personalityCard: record_opt_to_undefined(from_candid_opt_n6(_uploadFile, _downloadFile, value.personalityCard)),
+        personalityCard: record_opt_to_undefined(from_candid_opt_n10(_uploadFile, _downloadFile, value.personalityCard)),
         isAnchor: value.isAnchor
     };
 }
-function from_candid_variant_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     results: null;
+} | {
+    topicSelection: null;
 } | {
     waiting: null;
 } | {
     chatting: null;
 } | {
     guessing: null;
-}): Variant_results_waiting_chatting_guessing {
-    return "results" in value ? Variant_results_waiting_chatting_guessing.results : "waiting" in value ? Variant_results_waiting_chatting_guessing.waiting : "chatting" in value ? Variant_results_waiting_chatting_guessing.chatting : "guessing" in value ? Variant_results_waiting_chatting_guessing.guessing : value;
+}): Phase {
+    return "results" in value ? Phase.results : "topicSelection" in value ? Phase.topicSelection : "waiting" in value ? Phase.waiting : "chatting" in value ? Phase.chatting : "guessing" in value ? Phase.guessing : value;
 }
-function from_candid_vec_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_PlayerView>): Array<PlayerView> {
-    return value.map((x)=>from_candid_PlayerView_n4(_uploadFile, _downloadFile, x));
+function from_candid_vec_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_PlayerView>): Array<PlayerView> {
+    return value.map((x)=>from_candid_PlayerView_n8(_uploadFile, _downloadFile, x));
 }
 export interface CreateActorOptions {
     agent?: Agent;

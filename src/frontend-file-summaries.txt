@@ -1,6 +1,6 @@
 {
-  "frontend/src/App.tsx": "Main application component that manages screen routing based on session state and room phase enum values, with automatic transitions between Home, Lobby, Chat, Guessing, and Results screens.",
-  "frontend/src/echoshift/state/session.ts": "Zustand store for managing global session state including player ID, username, room code, host status, current screen, and errors, with localStorage persistence for player identity.",
+  "frontend/src/App.tsx": "Main application component that manages screen routing based on session state and room phase enum values, with automatic transitions between Home, Lobby, Topic Selection, Chat, Guessing, and Results screens.",
+  "frontend/src/echoshift/state/session.ts": "Zustand store for managing global session state including player ID, username, room code, host status, current screen (now including topicSelection), and errors, with localStorage persistence for player identity.",
   "frontend/src/echoshift/identity/username.ts": "Username generation utilities that create anonymous usernames in AdjectiveAnimalNumber format (e.g., BlueTiger42) with validation.",
   "frontend/src/echoshift/identity/playerId.ts": "Player ID generation and persistence utilities for creating unique anonymous player identifiers stored in localStorage.",
   "frontend/src/echoshift/identity/useLocalUsername.ts": "React hook that manages local username state, auto-generates usernames on first use, and provides a reset function.",
@@ -16,9 +16,15 @@
   "frontend/src/echoshift/components/ChatComposer.tsx": "Chat input component with send button, character limit validation, and loading states.",
   "frontend/src/echoshift/screens/HomeScreen.tsx": "Landing screen with username display/reset, create room, and join room functionality using card-based layout.",
   "frontend/src/echoshift/screens/LobbyScreen.tsx": "Lobby screen showing connected players, room code, host controls, and start game button with player count validation.",
-  "frontend/src/echoshift/screens/GameChatScreen.tsx": "Game chat screen displaying role assignment (Anchor or assigned personality role like \"Overly Dramatic\", \"Suspicious\", etc.), message list, and chat composer during the chatting phase.",
-  "frontend/src/echoshift/screens/GuessingScreen.tsx": "Guessing phase screen with placeholder UI noting that backend guess submission is not yet implemented.",
-  "frontend/src/echoshift/screens/ResultsScreen.tsx": "Results screen revealing the Anchor, all personality cards, and game outcome with return home action.",
+  "frontend/src/echoshift/screens/GameChatScreen.tsx": "Game chat screen displaying countdown timer at top, selected conversation topic, player role banner, message list, and chat composer; disables input when timer expires and triggers automatic phase advance checks to transition to Guessing screen.",
+  "frontend/src/echoshift/screens/GuessingScreen.tsx": "Guessing phase screen that displays a multi-select checkbox list of all non-Anchor players for the Anchor to select who they think were acting weird, with a Submit Guess button; non-Anchor players see a waiting message.",
+  "frontend/src/echoshift/screens/ResultsScreen.tsx": "Results screen that displays all players with their roles (Anchor or Personality Card name), highlights selected players with correct/incorrect indicators, calculates and shows points earned (Anchor gets 1 point per correct guess, non-Anchor players get 1 point if not caught), displays summary messages including survivor notifications, and provides a Play Again button to return to lobby.",
   "frontend/src/index.css": "Global styles with custom OKLCH color system using purple/violet theme palette for both light and dark modes with soft, rounded aesthetic.",
-  "frontend/tailwind.config.js": "Tailwind configuration extending theme with Inter font family, custom color tokens, increased border radius, and soft shadow utilities."
+  "frontend/tailwind.config.js": "Tailwind configuration extending theme with Inter font family, custom color tokens, increased border radius, and soft shadow utilities.",
+  "frontend/src/echoshift/api/useVoteForTopic.ts": "React Query mutation hook for voting on conversation topics during the Topic Selection phase, with error handling via toast notifications and automatic room state invalidation.",
+  "frontend/src/echoshift/screens/TopicSelectionScreen.tsx": "Topic Selection screen that displays three generated conversation topics, allows players to vote for one, shows a countdown timer (20 seconds), displays vote counts, and automatically transitions to chat when all players vote or time expires.",
+  "frontend/src/echoshift/hooks/useChatCountdown.ts": "React hook that calculates remaining chat time from backend-synchronized chatCountdownStartTime (180 seconds duration), returns remainingSeconds, formatted time string, and expiration status, updating every 100ms for smooth UI; accepts RoomStateView | null | undefined to match useRoomState return type.",
+  "frontend/src/echoshift/api/useCheckAndAdvancePhase.ts": "React Query mutation hook that calls backend checkAndAdvancePhase to trigger room phase transition from Chatting to Guessing, with automatic room state invalidation on success.",
+  "frontend/src/echoshift/api/useSubmitGuess.ts": "React Query mutation hook that submits the Anchor's selected player IDs as guesses to the backend, invalidates room state on success to trigger phase transition to results, and shows error toasts on failure.",
+  "frontend/src/echoshift/api/usePlayAgain.ts": "React Query mutation hook that calls backend playAgain to reset the room to lobby phase, invalidates room state on success, and shows toast notifications for success/error states."
 }

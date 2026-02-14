@@ -1,18 +1,75 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T09:08:04.048Z",
+  "generatedAt": "2026-02-14T12:43:52.663Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 0,
+    "total": 6,
+    "implemented": 5,
     "items": [
       {
-        "id": "REQ-13",
-        "summary": "Update the backend `startGame(roomCode, hostId)` logic so that after one player is assigned `role = \"Anchor\"`, every other player in the room is assigned exactly one random role from this list and persisted in the room state: `Overly Dramatic`, `Suspicious`, `Motivational`, `Alien`, `Villain`, `Emotional`, `Reporter`, `Conspiracy`.",
+        "id": "REQ-32",
+        "summary": "Update the Results screen UI to show every player with their revealed role using these exact rules: (a) if player.role is exactly \"Anchor\", display role label \"Anchor\"; (b) otherwise display the player’s Personality Card (use the player.role string as the Personality Card name).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/echoshift/screens/ResultsScreen.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/echoshift/screens/ResultsScreen.tsx"
+        ]
+      },
+      {
+        "id": "REQ-33",
+        "summary": "On the Results screen, highlight which players were guessed by the Anchor and which of those guesses were correct, using the persisted roomState.guesses list as the source of truth for who was selected.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/echoshift/screens/ResultsScreen.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/echoshift/screens/ResultsScreen.tsx"
+        ]
+      },
+      {
+        "id": "REQ-34",
+        "summary": "Compute and display points on the Results screen using these rules: Anchor gets 1 point for each correct guess; each non-Anchor (\"Weird\") player gets 1 point if the Anchor did NOT guess them. Show each player’s earned points alongside their row.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/echoshift/screens/ResultsScreen.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/echoshift/screens/ResultsScreen.tsx"
+        ]
+      },
+      {
+        "id": "REQ-35",
+        "summary": "Add summary messaging on the Results screen: (a) display a top-level summary like \"Anchor guessed X/Y correctly!\" where X is the correct guess count and Y is the total number of non-Anchor players; (b) display per-player outcome messaging for non-Anchor players including \"[PlayerName] survived without being caught!\" when that player was not guessed.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/echoshift/screens/ResultsScreen.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/echoshift/screens/ResultsScreen.tsx"
+        ]
+      },
+      {
+        "id": "REQ-36",
+        "summary": "Implement a \"Play Again\" button on the Results screen that returns the room to the Lobby for all players by resetting the room’s phase and per-round state on the backend, then letting the existing phase-based screen auto-transition move clients to Lobby.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/echoshift/api/usePlayAgain.ts",
+          "frontend/src/echoshift/screens/ResultsScreen.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/echoshift/api/usePlayAgain.ts",
+          "frontend/src/echoshift/screens/ResultsScreen.tsx"
+        ]
+      },
+      {
+        "id": "REQ-37",
+        "summary": "Fix backend guessing correctness counting so that submitGuesses returns a correctCount consistent with the current game rule: a guess is correct if the guessed target is a non-Anchor player (player.role != \"Anchor\"), regardless of Guess.guess text value.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
@@ -30,8 +87,8 @@
     "frontend/src/backend.ts",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/echoshift/api/useRoomState.ts",
-    "frontend/src/echoshift/screens/GameChatScreen.tsx",
+    "frontend/src/echoshift/api/usePlayAgain.ts",
+    "frontend/src/echoshift/screens/ResultsScreen.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

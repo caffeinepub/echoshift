@@ -1,13 +1,18 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 9,
-  "summary": "Build EchoShift, a real-time multiplayer party chat web app (MVP) for 3–6 players with anonymous usernames, room codes, lobby, chat gameplay, guessing, and results—no login, minimal modern responsive UI.",
+  "projectStateVersion": 19,
+  "summary": "Build EchoShift, a real-time multiplayer party chat web app (MVP) for 3–6 players with anonymous usernames, room codes, lobby, role assignment, a pre-chat topic voting screen, chat gameplay with timer, a post-chat Guessing screen where only the Anchor can multi-select non-Anchor players via checkboxes and submit a guess, saving per-player correctness results to the database, then transitioning everyone to Results—no login, minimal modern responsive UI.",
   "architectural_notes": [
     "MVP scope: no power cards yet.",
     "Realtime backend should use Firebase or Supabase for room state + chat messages.",
     "No authentication: players use auto-generated anonymous usernames and join via room code.",
     "Extend the room/player data model to include a per-player 'role' field (string, default \"\") stored in the backend room state.",
-    "Start Game scope update: after setting exactly one player.role = \"Anchor\", assign every other player.role to a random value from: Overly Dramatic, Suspicious, Motivational, Alien, Villain, Emotional, Reporter, Conspiracy; persist roles; do not modify any other room/player fields."
+    "Start Game scope update: after setting exactly one player.role = \"Anchor\", assign every other player.role to a random value from: Overly Dramatic, Suspicious, Motivational, Alien, Villain, Emotional, Reporter, Conspiracy; persist roles; do not modify any other room/player fields.",
+    "Chat UI must display only the current player's own role (never other players' roles); if role == \"Anchor\" show: \"You are the Anchor. Observe carefully.\" else show: \"Your Personality: [role name]\".",
+    "Add a Topic Selection phase/screen before Chat: after roles assigned, generate 3 random topics from the provided fixed list, collect one vote per player, end when all voted or after 20 seconds, choose topic with most votes, persist selected topic in room state, then transition all players to Chat; Chat UI shows selected topic at top.",
+    "Chat phase requires a room-synced 180s countdown timer that starts when Chat begins; when it expires, disable chat input and advance room phase to Guessing for all players.",
+    "Guessing phase update: after Chat timer ends, transition to a Guessing screen where only the Anchor can select any number of non-Anchor players (checkbox list) and submit; on submit, compute correctness by comparing selections vs each player's actual role, persist guess + per-player correct/incorrect results in room state/database, then advance all players to Results.",
+    "Results/Scoring rules: On Results, reveal roles (Anchor shown as \"Anchor\"; others show their Personality Card/role). Highlight which non-Anchor players were guessed correctly by the Anchor. Award points: Anchor gets +1 per correctly guessed non-Anchor; each non-Anchor gets +1 if the Anchor did NOT guess them. Show a summary message (e.g., \"Anchor guessed X/Y correctly!\" and per-player survival message) and provide a \"Play Again\" action that returns the room to Lobby for a new round (clean, readable UI with soft rounded cards)."
   ],
   "known_issues": [],
   "isFixRequest": false,
@@ -73,6 +78,150 @@
       "title": "Update generated frontend/backend type bindings (as needed) so the frontend compiles with the updated `Player` type that now includes the `role` field, without introducing any new UI behavior or user-facing text.",
       "reqIds": [
         "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-game-chat-screen-add-a-role-banner-at-the-top-of-the-screen-that-displays-only-the-current-player-s-role-with-the-following-exact-copy-rules-1-if-the-current-player-s-role-is-exactly-anchor-show-you-are-the-anchor-observe-carefully-2-otherwise-show-your-personality-role-name-where-role-name-is-the-current-player-s-role-value-do-not-display-any-other-role-related-guidance-text",
+      "title": "On the Game Chat screen, add a role banner at the top of the screen that displays only the current player's role with the following exact copy rules: (1) If the current player's role is exactly \"Anchor\", show: \"You are the Anchor. Observe carefully.\" (2) Otherwise, show: \"Your Personality: [role name]\" where [role name] is the current player's role value. Do not display any other role-related guidance text.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-pre-chat-game-phase-for-topic-selection-that-occurs-after-roles-are-assigned-and-before-the-chat-phase-begins",
+      "title": "Add a new pre-chat game phase for Topic Selection that occurs after roles are assigned and before the chat phase begins.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-topic-voting-allow-each-player-to-vote-for-exactly-one-of-the-3-generated-topics-persist-votes-in-the-room-state-and-prevent-invalid-votes-e-g-voting-for-a-non-existent-index-topic",
+      "title": "Implement topic voting: allow each player to vote for exactly one of the 3 generated topics, persist votes in the room state, and prevent invalid votes (e.g., voting for a non-existent index/topic).",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-finalize-topic-selection-when-either-a-all-connected-players-have-voted-or-b-20-seconds-have-elapsed-since-topic-selection-started-select-the-topic-with-the-most-votes-persist-the-selected-topic-in-room-state-and-automatically-advance-the-room-phase-to-chatting-for-all-players",
+      "title": "Finalize topic selection when either (a) all connected players have voted or (b) 20 seconds have elapsed since Topic Selection started: select the topic with the most votes, persist the selected topic in room state, and automatically advance the room phase to Chatting for all players.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-new-react-topic-selection-screen-that-displays-the-3-generated-topics-supports-voting-and-shows-a-visible-countdown-20-seconds-until-auto-finalization",
+      "title": "Create a new React Topic Selection screen that displays the 3 generated topics, supports voting, and shows a visible countdown (20 seconds) until auto-finalization.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-show-the-selected-conversation-topic-at-the-top-of-the-game-chat-screen-above-the-existing-role-banner-using-the-topic-stored-in-room-state",
+      "title": "Show the selected conversation topic at the top of the Game Chat screen (above the existing role banner), using the topic stored in room state.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-game-chat-screen-display-a-visible-countdown-timer-at-the-top-of-the-screen-that-starts-automatically-when-the-screen-loads-and-is-derived-from-the-synchronized-backend-chat-countdown-start-timestamp-the-timer-must-show-the-same-remaining-time-for-all-players-within-the-existing-polling-interval-tolerance",
+      "title": "On the Game Chat screen, display a visible countdown timer at the top of the screen that starts automatically when the screen loads and is derived from the synchronized backend chat countdown start timestamp. The timer must show the same remaining time for all players (within the existing polling interval tolerance).",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-when-the-chat-countdown-reaches-0-disable-the-chat-input-on-the-game-chat-screen-and-ensure-the-ui-cannot-send-new-messages-during-after-timeout-clients-must-also-proactively-trigger-or-keep-triggering-the-backend-auto-advance-check-so-the-room-reliably-transitions-to-guessing-even-if-nobody-sends-messages-at-the-end-of-the-timer",
+      "title": "When the chat countdown reaches 0, disable the chat input on the Game Chat screen and ensure the UI cannot send new messages during/after timeout. Clients must also proactively trigger (or keep triggering) the backend auto-advance check so the room reliably transitions to Guessing even if nobody sends messages at the end of the timer.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-backend-type-bindings-and-any-necessary-state-view-models-so-the-frontend-compiles-and-can-read-the-new-chat-countdown-start-timestamp-from-room-state-without-introducing-unrelated-ui-behavior-changes",
+      "title": "Update frontend/backend type bindings and any necessary state/view models so the frontend compiles and can read the new chat countdown start timestamp from room state without introducing unrelated UI behavior changes.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-frontend-replace-the-placeholder-guessing-screen-with-a-functional-multi-select-ui-show-a-checkbox-list-of-all-non-anchor-players-only-the-anchor-can-interact-with-the-checkboxes-and-submit-non-anchors-see-a-waiting-state",
+      "title": "Frontend: Replace the placeholder Guessing screen with a functional multi-select UI: show a checkbox list of all non-Anchor players; only the Anchor can interact with the checkboxes and submit; non-Anchors see a waiting state.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-frontend-add-a-react-query-mutation-hook-to-submit-the-anchor-s-selected-player-ids-to-the-backend-handle-errors-with-an-english-toast-and-refresh-room-state-so-phase-changes-move-everyone-to-results",
+      "title": "Frontend: Add a React Query mutation hook to submit the Anchor’s selected player IDs to the backend, handle errors with an English toast, and refresh room state so phase changes move everyone to Results.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-frontend-update-the-results-screen-to-display-the-persisted-guessing-results-remove-any-placeholder-text-indicating-guessing-scoring-is-not-implemented-and-use-role-anchor-as-the-source-of-truth-for-identifying-the-anchor-and-non-anchor-players",
+      "title": "Frontend: Update the Results screen to display the persisted guessing results (remove any placeholder text indicating guessing/scoring is not implemented) and use role == \"Anchor\" as the source of truth for identifying the Anchor and non-Anchor players.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-types-bindings-update-frontend-backend-type-bindings-and-any-roomstateview-consumption-code-needed-so-the-frontend-compiles-and-can-read-the-new-guessing-results-fields-without-introducing-unrelated-ui-behavior-changes",
+      "title": "Types/bindings: Update frontend backend type bindings and any RoomStateView consumption code needed so the frontend compiles and can read the new Guessing/Results fields without introducing unrelated UI behavior changes.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-results-screen-ui-to-show-every-player-with-their-revealed-role-using-these-exact-rules-a-if-player-role-is-exactly-anchor-display-role-label-anchor-b-otherwise-display-the-player-s-personality-card-use-the-player-role-string-as-the-personality-card-name",
+      "title": "Update the Results screen UI to show every player with their revealed role using these exact rules: (a) if player.role is exactly \"Anchor\", display role label \"Anchor\"; (b) otherwise display the player’s Personality Card (use the player.role string as the Personality Card name).",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-results-screen-highlight-which-players-were-guessed-by-the-anchor-and-which-of-those-guesses-were-correct-using-the-persisted-roomstate-guesses-list-as-the-source-of-truth-for-who-was-selected",
+      "title": "On the Results screen, highlight which players were guessed by the Anchor and which of those guesses were correct, using the persisted roomState.guesses list as the source of truth for who was selected.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-compute-and-display-points-on-the-results-screen-using-these-rules-anchor-gets-1-point-for-each-correct-guess-each-non-anchor-weird-player-gets-1-point-if-the-anchor-did-not-guess-them-show-each-player-s-earned-points-alongside-their-row",
+      "title": "Compute and display points on the Results screen using these rules: Anchor gets 1 point for each correct guess; each non-Anchor (\"Weird\") player gets 1 point if the Anchor did NOT guess them. Show each player’s earned points alongside their row.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-summary-messaging-on-the-results-screen-a-display-a-top-level-summary-like-anchor-guessed-x-y-correctly-where-x-is-the-correct-guess-count-and-y-is-the-total-number-of-non-anchor-players-b-display-per-player-outcome-messaging-for-non-anchor-players-including-playername-survived-without-being-caught-when-that-player-was-not-guessed",
+      "title": "Add summary messaging on the Results screen: (a) display a top-level summary like \"Anchor guessed X/Y correctly!\" where X is the correct guess count and Y is the total number of non-Anchor players; (b) display per-player outcome messaging for non-Anchor players including \"[PlayerName] survived without being caught!\" when that player was not guessed.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-play-again-button-on-the-results-screen-that-returns-the-room-to-the-lobby-for-all-players-by-resetting-the-room-s-phase-and-per-round-state-on-the-backend-then-letting-the-existing-phase-based-screen-auto-transition-move-clients-to-lobby",
+      "title": "Implement a \"Play Again\" button on the Results screen that returns the room to the Lobby for all players by resetting the room’s phase and per-round state on the backend, then letting the existing phase-based screen auto-transition move clients to Lobby.",
+      "reqIds": [
+        "REQ-36"
       ],
       "version": 1
     }
@@ -169,6 +318,84 @@
       "summary": "Update the backend `startGame(roomCode, hostId)` logic so that after one player is assigned `role = \"Anchor\"`, every other player in the room is assigned exactly one random role from this list and persisted in the room state: `Overly Dramatic`, `Suspicious`, `Motivational`, `Alien`, `Villain`, `Emotional`, `Reporter`, `Conspiracy`.",
       "reqIds": [
         "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Chat screen: show only the current player's role at the top with conditional copy (Anchor: \"You are the Anchor. Observe carefully.\"; otherwise: \"Your Personality: [role]\") and do not reveal other players' roles",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Add a pre-chat Topic Selection screen: generate 3 random topics from a fixed list after role assignment, let all players vote, after all votes or 20s pick the most-voted topic, save it to the room, then auto-advance everyone to Chat; display selected topic at top of Chat screen",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "On game start (right after roles are assigned), generate exactly 3 random conversation topics from the provided fixed list and store them in the room state so all players see the same three options.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Chat phase: add a synced 3-minute (180s) countdown timer visible at top; starts when Chat screen loads; when it hits 0 disable chat input and auto-advance all players to Guessing",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Persist a synchronized Chat phase countdown start time on the backend so all players see the same remaining time for the Chat phase (180 seconds). The countdown start time must be set when the room enters the Chatting phase after Topic Selection finalization.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Add backend logic to automatically end the Chatting phase when the 180-second countdown expires by transitioning the room phase from Chatting to Guessing, in an idempotent way that works even if multiple players trigger it around the same time.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-25",
+      "summary": "Update Guessing flow: after chat timer ends, show Guessing screen where only the Anchor can multi-select (checkboxes) any number of non-Anchor players, submit guess, compare selections vs actual roles, persist results, then advance all players to Results",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Backend: Add persistent Guessing results to room state and expose them in the room state view so the frontend can render the outcome after the Anchor submits.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Backend: Implement an update method for the Anchor to submit a Guessing selection for a room during the Guessing phase, compute correctness by comparing the submitted selections to each player's actual role, persist the computed results, and transition the room phase to Results.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Results screen enhancements: show each player’s revealed role (Anchor vs Personality Card), highlight Anchor’s correct guesses, compute/award points (Anchor +1 per correct; each non-Anchor +1 if not guessed), show summary messages, and add a 'Play Again' button returning everyone to Lobby with clean rounded-card UI",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-34",
+      "summary": "Fix backend guessing correctness counting so that submitGuesses returns a correctCount consistent with the current game rule: a guess is correct if the guessed target is a non-Anchor player (player.role != \"Anchor\"), regardless of Guess.guess text value.",
+      "reqIds": [
+        "REQ-37"
       ],
       "status": "pending"
     }

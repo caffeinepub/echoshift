@@ -1,11 +1,14 @@
 # Specification
 
 ## Summary
-**Goal:** Assign a random non-Anchor role to every non-Anchor player when a game starts, and persist those roles in the room state.
+**Goal:** Enhance the Results screen with role reveals, guess highlighting, scoring, summary messages, and a Play Again flow that returns the room to the Lobby.
 
 **Planned changes:**
-- Update backend `startGame(roomCode, hostId)` so that after the existing Anchor assignment, each other player is assigned exactly one random role from: `Overly Dramatic`, `Suspicious`, `Motivational`, `Alien`, `Villain`, `Emotional`, `Reporter`, `Conspiracy`.
-- Persist the assigned non-Anchor roles so `getRoomState(roomCode)` returns updated `players[].role` values.
-- Ensure the Anchor’s `role` is not modified and no other room/player fields are changed beyond what `startGame` already changes.
+- Update the Results screen to render all players and reveal roles: show the exact label "Anchor" for the Anchor, otherwise show the player.role as the Personality Card name.
+- Visually highlight which players were selected in roomState.guesses and differentiate correct vs incorrect selections based on whether the selected player is non-Anchor.
+- Compute and display per-player points on the Results screen (Anchor: 1 per correct guess; each non-Anchor: 1 if not guessed), computed client-side from roomState.
+- Add Results summary messaging: "Anchor guessed X/Y correctly!" and per-player survival messages for non-Anchor players not guessed.
+- Add a "Play Again" button that calls a backend reset to set the room back to lobby-ready state (phase #waiting and per-round state cleared), then refetch room state so all clients transition to Lobby via existing phase-based routing; show an English toast on failure.
+- Fix backend submitGuesses correctCount calculation to count guesses that target non-Anchor players, independent of any guess text.
 
-**User-visible outcome:** Starting a game results in one Anchor and all other players automatically having a saved random role from the provided list (reflected in subsequent room state reads).
+**User-visible outcome:** After a round ends, players see a clearer Results screen with revealed roles, highlighted guesses and correctness, points and summary messages, and can press "Play Again" to reset the room back to the Lobby for everyone.

@@ -15,7 +15,21 @@ export interface ChatMessage {
   'message' : string,
   'timestamp' : Time,
 }
+export interface Guess {
+  'guess' : string,
+  'targetId' : PlayerId,
+  'guesserId' : PlayerId,
+}
+export interface GuessingResult {
+  'correctCount' : bigint,
+  'guesses' : Array<Guess>,
+}
 export interface PersonalityCard { 'trait' : string }
+export type Phase = { 'results' : null } |
+  { 'topicSelection' : null } |
+  { 'waiting' : null } |
+  { 'chatting' : null } |
+  { 'guessing' : null };
 export type PlayerId = string;
 export interface PlayerView {
   'id' : PlayerId,
@@ -26,23 +40,33 @@ export interface PlayerView {
 }
 export type RoomCode = string;
 export interface RoomStateView {
+  'selectedTopic' : [] | [Topic],
+  'generatedTopics' : Array<Topic>,
+  'votes' : Array<TopicVote>,
   'chatMessages' : Array<ChatMessage>,
+  'chatCountdownStartTime' : [] | [Time],
   'players' : Array<PlayerView>,
-  'phase' : { 'results' : null } |
-    { 'waiting' : null } |
-    { 'chatting' : null } |
-    { 'guessing' : null },
+  'phase' : Phase,
   'hostId' : PlayerId,
   'roomCode' : RoomCode,
+  'roundNumber' : bigint,
+  'topicSelectionStartTime' : [] | [Time],
+  'guesses' : Array<Guess>,
 }
 export type Time = bigint;
+export interface Topic { 'question' : string }
+export interface TopicVote { 'playerId' : PlayerId, 'topicIndex' : bigint }
 export interface _SERVICE {
-  'assignRoleToPlayer' : ActorMethod<[RoomCode, PlayerId, string], undefined>,
+  'checkAndAdvancePhase' : ActorMethod<[RoomCode], undefined>,
   'createRoom' : ActorMethod<[PlayerId, string, RoomCode], undefined>,
+  'getRoomPhase' : ActorMethod<[RoomCode], Phase>,
   'getRoomState' : ActorMethod<[RoomCode], RoomStateView>,
   'joinRoom' : ActorMethod<[RoomCode, PlayerId, string], undefined>,
+  'playAgain' : ActorMethod<[RoomCode], undefined>,
   'sendMessage' : ActorMethod<[RoomCode, string, string], undefined>,
   'startGame' : ActorMethod<[RoomCode, PlayerId], undefined>,
+  'submitGuesses' : ActorMethod<[RoomCode, Array<Guess>], GuessingResult>,
+  'voteForTopic' : ActorMethod<[RoomCode, PlayerId, bigint], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

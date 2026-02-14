@@ -10,6 +10,18 @@ import { IDL } from '@icp-sdk/core/candid';
 
 export const RoomCode = IDL.Text;
 export const PlayerId = IDL.Text;
+export const Phase = IDL.Variant({
+  'results' : IDL.Null,
+  'topicSelection' : IDL.Null,
+  'waiting' : IDL.Null,
+  'chatting' : IDL.Null,
+  'guessing' : IDL.Null,
+});
+export const Topic = IDL.Record({ 'question' : IDL.Text });
+export const TopicVote = IDL.Record({
+  'playerId' : PlayerId,
+  'topicIndex' : IDL.Nat,
+});
 export const Time = IDL.Int;
 export const ChatMessage = IDL.Record({
   'sender' : IDL.Text,
@@ -24,26 +36,41 @@ export const PlayerView = IDL.Record({
   'personalityCard' : IDL.Opt(PersonalityCard),
   'isAnchor' : IDL.Bool,
 });
+export const Guess = IDL.Record({
+  'guess' : IDL.Text,
+  'targetId' : PlayerId,
+  'guesserId' : PlayerId,
+});
 export const RoomStateView = IDL.Record({
+  'selectedTopic' : IDL.Opt(Topic),
+  'generatedTopics' : IDL.Vec(Topic),
+  'votes' : IDL.Vec(TopicVote),
   'chatMessages' : IDL.Vec(ChatMessage),
+  'chatCountdownStartTime' : IDL.Opt(Time),
   'players' : IDL.Vec(PlayerView),
-  'phase' : IDL.Variant({
-    'results' : IDL.Null,
-    'waiting' : IDL.Null,
-    'chatting' : IDL.Null,
-    'guessing' : IDL.Null,
-  }),
+  'phase' : Phase,
   'hostId' : PlayerId,
   'roomCode' : RoomCode,
+  'roundNumber' : IDL.Nat,
+  'topicSelectionStartTime' : IDL.Opt(Time),
+  'guesses' : IDL.Vec(Guess),
+});
+export const GuessingResult = IDL.Record({
+  'correctCount' : IDL.Nat,
+  'guesses' : IDL.Vec(Guess),
 });
 
 export const idlService = IDL.Service({
-  'assignRoleToPlayer' : IDL.Func([RoomCode, PlayerId, IDL.Text], [], []),
+  'checkAndAdvancePhase' : IDL.Func([RoomCode], [], []),
   'createRoom' : IDL.Func([PlayerId, IDL.Text, RoomCode], [], []),
+  'getRoomPhase' : IDL.Func([RoomCode], [Phase], ['query']),
   'getRoomState' : IDL.Func([RoomCode], [RoomStateView], ['query']),
   'joinRoom' : IDL.Func([RoomCode, PlayerId, IDL.Text], [], []),
+  'playAgain' : IDL.Func([RoomCode], [], []),
   'sendMessage' : IDL.Func([RoomCode, IDL.Text, IDL.Text], [], []),
   'startGame' : IDL.Func([RoomCode, PlayerId], [], []),
+  'submitGuesses' : IDL.Func([RoomCode, IDL.Vec(Guess)], [GuessingResult], []),
+  'voteForTopic' : IDL.Func([RoomCode, PlayerId, IDL.Nat], [], []),
 });
 
 export const idlInitArgs = [];
@@ -51,6 +78,18 @@ export const idlInitArgs = [];
 export const idlFactory = ({ IDL }) => {
   const RoomCode = IDL.Text;
   const PlayerId = IDL.Text;
+  const Phase = IDL.Variant({
+    'results' : IDL.Null,
+    'topicSelection' : IDL.Null,
+    'waiting' : IDL.Null,
+    'chatting' : IDL.Null,
+    'guessing' : IDL.Null,
+  });
+  const Topic = IDL.Record({ 'question' : IDL.Text });
+  const TopicVote = IDL.Record({
+    'playerId' : PlayerId,
+    'topicIndex' : IDL.Nat,
+  });
   const Time = IDL.Int;
   const ChatMessage = IDL.Record({
     'sender' : IDL.Text,
@@ -65,26 +104,45 @@ export const idlFactory = ({ IDL }) => {
     'personalityCard' : IDL.Opt(PersonalityCard),
     'isAnchor' : IDL.Bool,
   });
+  const Guess = IDL.Record({
+    'guess' : IDL.Text,
+    'targetId' : PlayerId,
+    'guesserId' : PlayerId,
+  });
   const RoomStateView = IDL.Record({
+    'selectedTopic' : IDL.Opt(Topic),
+    'generatedTopics' : IDL.Vec(Topic),
+    'votes' : IDL.Vec(TopicVote),
     'chatMessages' : IDL.Vec(ChatMessage),
+    'chatCountdownStartTime' : IDL.Opt(Time),
     'players' : IDL.Vec(PlayerView),
-    'phase' : IDL.Variant({
-      'results' : IDL.Null,
-      'waiting' : IDL.Null,
-      'chatting' : IDL.Null,
-      'guessing' : IDL.Null,
-    }),
+    'phase' : Phase,
     'hostId' : PlayerId,
     'roomCode' : RoomCode,
+    'roundNumber' : IDL.Nat,
+    'topicSelectionStartTime' : IDL.Opt(Time),
+    'guesses' : IDL.Vec(Guess),
+  });
+  const GuessingResult = IDL.Record({
+    'correctCount' : IDL.Nat,
+    'guesses' : IDL.Vec(Guess),
   });
   
   return IDL.Service({
-    'assignRoleToPlayer' : IDL.Func([RoomCode, PlayerId, IDL.Text], [], []),
+    'checkAndAdvancePhase' : IDL.Func([RoomCode], [], []),
     'createRoom' : IDL.Func([PlayerId, IDL.Text, RoomCode], [], []),
+    'getRoomPhase' : IDL.Func([RoomCode], [Phase], ['query']),
     'getRoomState' : IDL.Func([RoomCode], [RoomStateView], ['query']),
     'joinRoom' : IDL.Func([RoomCode, PlayerId, IDL.Text], [], []),
+    'playAgain' : IDL.Func([RoomCode], [], []),
     'sendMessage' : IDL.Func([RoomCode, IDL.Text, IDL.Text], [], []),
     'startGame' : IDL.Func([RoomCode, PlayerId], [], []),
+    'submitGuesses' : IDL.Func(
+        [RoomCode, IDL.Vec(Guess)],
+        [GuessingResult],
+        [],
+      ),
+    'voteForTopic' : IDL.Func([RoomCode, PlayerId, IDL.Nat], [], []),
   });
 };
 
